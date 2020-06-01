@@ -196,8 +196,8 @@ class Contests(commands.Cog):
         return True
 
     def _generate_contest_cache(self):
-        contestFile = Path(constants.CONTESTS_DB_FILE_PATH)
-        with contestFile.open() as f:
+        db_file = Path(constants.CONTESTS_DB_FILE_PATH)
+        with db_file.open() as f:
             data = json.load(f)
         contests = [Round(contest) for contest in data['objects']]
         self.contest_cache = [

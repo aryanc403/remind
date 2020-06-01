@@ -6,6 +6,7 @@ import textwrap
 
 from discord.ext import commands
 from remind.util.codeforces_common import pretty_time_format
+from remind.util import clist_api
 
 RESTART = 42
 
@@ -98,6 +99,16 @@ class Meta(commands.Cog):
         msg = [f'Guild ID: {guild.id} | Name: {guild.name} | Owner: {guild.owner.id} | Icon: {guild.icon_url}'
                for guild in self.bot.guilds]
         await ctx.send('```' + '\n'.join(msg) + '```')
+
+    @meta.command(brief='Forcefully reset contests')
+    @commands.has_role('Admin')
+    async def resetcache(self, ctx):
+        "Resets contest cache."
+        try:
+            clist_api.cache(True)
+            await ctx.send('```' + 'Cache reset compete. Restart to reschedule all contest reminders.' + '```')
+        except:
+            await ctx.send('```' + 'Cache reset failed.' + '```')
 
 
 def setup(bot):

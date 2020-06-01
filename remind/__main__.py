@@ -10,6 +10,7 @@ from discord.ext import commands
 from dotenv import load_dotenv
 from pathlib import Path
 from remind.util import discord_common
+from remind.util import clist_api
 
 
 def setup():
@@ -60,11 +61,11 @@ def main():
 
     @bot.event
     async def on_ready():
+        clist_api.cache()
         asyncio.create_task(discord_common.presence(bot))
 
     bot.add_listener(discord_common.bot_error_handler, name='on_command_error')
     bot.run(token)
-
 
 if __name__ == '__main__':
     main()
