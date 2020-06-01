@@ -5,7 +5,7 @@ import time
 import textwrap
 
 from discord.ext import commands
-# from remind.util.codeforces_common import pretty_time_format
+from remind.util.codeforces_common import pretty_time_format
 
 RESTART = 42
 
