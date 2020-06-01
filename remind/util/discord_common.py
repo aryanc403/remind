@@ -12,6 +12,7 @@ _CF_COLORS = (0xFFCA1F, 0x198BCC, 0xFF2020)
 _SUCCESS_GREEN = 0x28A745
 _ALERT_AMBER = 0xFFBF00
 
+
 def embed_neutral(desc, color=discord.Embed.Empty):
     return discord.Embed(description=str(desc), color=color)
 
@@ -22,6 +23,7 @@ def embed_success(desc):
 
 def embed_alert(desc):
     return discord.Embed(description=str(desc), color=_ALERT_AMBER)
+
 
 def cf_color_embed(**kwargs):
     return discord.Embed(**kwargs, color=random.choice(_CF_COLORS))
@@ -67,7 +69,9 @@ async def bot_error_handler(ctx, exception):
     #     await ctx.send(embed=embed_alert(exception))
     # else:
     exc_info = type(exception), exception, exception.__traceback__
-    logger.exception('Ignoring exception in command {}:'.format(ctx.command), exc_info=exc_info)
+    logger.exception(
+        'Ignoring exception in command {}:'.format(
+            ctx.command), exc_info=exc_info)
 
 
 async def presence(bot):

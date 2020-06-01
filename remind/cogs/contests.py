@@ -5,6 +5,7 @@ import logging
 import time
 import datetime as dt
 from pathlib import Path
+import pytz
 
 from collections import defaultdict
 
@@ -20,13 +21,14 @@ from remind.util import paginator
 # from remind.util import ranklist as rl
 # from remind.util import table
 # from remind.util import tasks
+from remind import constants
 
 _CONTESTS_PER_PAGE = 5
 _CONTEST_PAGINATE_WAIT_TIME = 5 * 60
 # _STANDINGS_PER_PAGE = 15
 # _STANDINGS_PAGINATE_WAIT_TIME = 2 * 60
 _FINISHED_CONTESTS_LIMIT = 5
-
+localtimezone=pytz.timezone("Asia/Kolkata")
 # (Channel ID, Role ID, [List of Minutes])
 _REMINDER_SETTINGS = (
     '537077716994883586',
@@ -51,6 +53,7 @@ def _contest_duration_format(contest):
         duration = f'{duration_days}d ' + duration
     return duration
 
+
 def _get_formatted_contest_desc(
         id_str,
         start,
@@ -70,8 +73,8 @@ def _get_embed_fields_from_contests(contests):
 
     infos = [(contest.name,
               str(contest.id),
-                _contest_start_time_format(contest,
-               dt.timezone.utc),
+              _contest_start_time_format(contest,
+                                         localtimezone),
               _contest_duration_format(contest),
               contest.url) for contest in contests]
     max_duration_len = max(len(duration) for _, _, _, duration, _ in infos)
@@ -128,7 +131,7 @@ class Round:
         return st
 
     def __repr__(self):
-        return "Round - "+self.name
+        return "Round - " + self.name
 
 
 class Contests(commands.Cog):
@@ -146,14 +149,14 @@ class Contests(commands.Cog):
         self.role_converter = commands.RoleConverter()
 
         self.logger = logging.getLogger(self.__class__.__name__)
-        self.tasks_started=False
+        self.tasks_started = False
 
     @commands.Cog.listener()
     async def on_ready(self):
         # self._update_task.start()
         if self.tasks_started:
             return
-        self.tasks_started=True
+        self.tasks_started = True
         self.logger.info(f'Starting reminder tasks.')
         asyncio.create_task(self._update_task())
         self.logger.info(f'Finished reminder tasks.')
@@ -193,7 +196,7 @@ class Contests(commands.Cog):
         return True
 
     def _generate_contest_cache(self):
-        contestFile = Path(__file__).parent / '../../data/contests.json'
+        contestFile = Path(constants.CONTESTS_DB_FILE_PATH)
         with contestFile.open() as f:
             data = json.load(f)
         contests = [Round(contest) for contest in data['objects']]

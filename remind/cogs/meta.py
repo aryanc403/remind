@@ -24,7 +24,10 @@ def git_history():
         env['LANGUAGE'] = 'C'
         env['LANG'] = 'C'
         env['LC_ALL'] = 'C'
-        out = subprocess.Popen(cmd, stdout = subprocess.PIPE, env=env).communicate()[0]
+        out = subprocess.Popen(
+            cmd,
+            stdout=subprocess.PIPE,
+            env=env).communicate()[0]
         return out
     try:
         out = _minimal_ext_cmd(['git', 'rev-parse', '--abbrev-ref', 'HEAD'])
@@ -93,7 +96,7 @@ class Meta(commands.Cog):
     async def guilds(self, ctx):
         "Replies with info on the bot's guilds"
         msg = [f'Guild ID: {guild.id} | Name: {guild.name} | Owner: {guild.owner.id} | Icon: {guild.icon_url}'
-                for guild in self.bot.guilds]
+               for guild in self.bot.guilds]
         await ctx.send('```' + '\n'.join(msg) + '```')
 
 

@@ -17,7 +17,8 @@ class WaiterRequired(TaskError):
 
 class TaskAlreadyRunning(TaskError):
     def __init__(self, name):
-        super().__init__(f'Attempt to start task `{name}` which is already running')
+        super().__init__(
+            f'Attempt to start task `{name}` which is already running')
 
 
 def _ensure_coroutine_func(func):
@@ -87,7 +88,14 @@ class Task:
     function `exception_handler` may be provided to which exceptions will be reported.
     """
 
-    def __init__(self, name, func, waiter, exception_handler=None, *, instance=None):
+    def __init__(
+            self,
+            name,
+            func,
+            waiter,
+            exception_handler=None,
+            *,
+            instance=None):
         """`instance`, if present, is passed as the first argument to `func`."""
         _ensure_coroutine_func(func)
         self.name = name
@@ -145,7 +153,8 @@ class Task:
         if self.running:
             self.logger.info(f'Stopping task `{self.name}`.')
             self.asyncio_task.cancel()
-            await asyncio.sleep(0)  # To ensure cancellation if called from within the task itself.
+            # To ensure cancellation if called from within the task itself.
+            await asyncio.sleep(0)
 
     async def _task(self):
         arg = None
@@ -164,7 +173,9 @@ class Task:
         except asyncio.CancelledError:
             raise
         except Exception as ex:
-            self.logger.warning(f'Exception in task `{self.name}`, ignoring.', exc_info=True)
+            self.logger.warning(
+                f'Exception in task `{self.name}`, ignoring.',
+                exc_info=True)
             if self._exception_handler is not None:
                 await self._exception_handler.handle(ex, self.instance)
 
@@ -187,7 +198,10 @@ class TaskSpec:
         """
 
         def decorator(func):
-            self._waiter = Waiter(func, run_first=run_first, needs_instance=needs_instance)
+            self._waiter = Waiter(
+                func,
+                run_first=run_first,
+                needs_instance=needs_instance)
             return func
 
         return decorator
@@ -198,7 +212,8 @@ class TaskSpec:
         """
 
         def decorator(func):
-            self._exception_handler = ExceptionHandler(func, needs_instance=needs_instance)
+            self._exception_handler = ExceptionHandler(
+                func, needs_instance=needs_instance)
             return func
 
         return decorator
@@ -211,7 +226,10 @@ class TaskSpec:
         except AttributeError:
             tasks = instance.___tasks___ = {}
         if self.name not in tasks:
-            tasks[self.name] = Task(self.name, self.func, self._waiter, self._exception_handler,
+            tasks[self.name] = Task(self.name,
+                                    self.func,
+                                    self._waiter,
+                                    self._exception_handler,
                                     instance=instance)
         return tasks[self.name]
 

@@ -103,7 +103,8 @@
 
 
 # def is_nonstandard_contest(contest):
-#     return any(string in contest.name.lower() for string in _NONSTANDARD_CONTEST_INDICATORS)
+# return any(string in contest.name.lower() for string in
+# _NONSTANDARD_CONTEST_INDICATORS)
 
 # def is_nonstandard_problem(problem):
 #     return (is_nonstandard_contest(cache2.contest_cache.get_contest(problem.contestId)) or
@@ -164,14 +165,20 @@ def time_format(seconds):
     return days, hours, minutes, seconds
 
 
-def pretty_time_format(seconds, *, shorten=False, only_most_significant=False, always_seconds=False):
+def pretty_time_format(
+        seconds,
+        *,
+        shorten=False,
+        only_most_significant=False,
+        always_seconds=False):
     days, hours, minutes, seconds = time_format(seconds)
     timespec = [
         (days, 'day', 'days'),
         (hours, 'hour', 'hours'),
         (minutes, 'minute', 'minutes'),
     ]
-    timeprint = [(cnt, singular, plural) for cnt, singular, plural in timespec if cnt]
+    timeprint = [(cnt, singular, plural)
+                 for cnt, singular, plural in timespec if cnt]
     if not timeprint or always_seconds:
         timeprint.append((seconds, 'second', 'seconds'))
     if only_most_significant:
