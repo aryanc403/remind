@@ -1,0 +1,95 @@
+{
+  "meta": {
+    "limit": 100,
+    "next": "/api/v1/contest/?start__gte=2020-05-31T00%3A00%3A00&username=aryanc403&api_key=mykey&limit=100&offset=100",
+    "offset": 0,
+    "previous": null,
+    "total_count": 116
+  },
+  "objects": [
+    {
+      "duration": 5400,
+      "end": "2020-06-01T05:00:00",
+      "event": "Weekly Contest 1910",
+      "href": "https://leetcode.com/contest/weekly-contest-191",
+      "id": 19995795,
+      "resource": {
+        "id": 1020,
+        "name": "leetcode.com"
+      },
+      "start": "2020-06-01T03:30:00"
+    },
+    {
+      "duration": 7200,
+      "end": "2020-09-05T18:00:00",
+      "event": "TCO20 Round 4",
+      "href": "https://topcoder.com/community/events/",
+      "id": 19473175,
+      "resource": {
+        "id": 12,
+        "name": "topcoder.com"
+      },
+      "start": "2020-09-05T16:00:00"
+    },
+    {
+      "duration": 5400,
+      "end": "2020-05-31T04:00:00",
+      "event": "Weekly Contest 191",
+      "href": "https://leetcode.com/contest/weekly-contest-191",
+      "id": 19995795,
+      "resource": {
+        "id": 102,
+        "name": "leetcode.com"
+      },
+      "start": "2020-05-31T02:30:00"
+    },
+    {
+      "duration": 6000,
+      "end": "2020-05-31T13:40:00",
+      "event": "AtCoder Beginner Contest 169",
+      "href": "https://atcoder.jp/contests/abc169",
+      "id": 19931422,
+      "resource": {
+        "id": 93,
+        "name": "atcoder.jp"
+      },
+      "start": "2020-05-31T12:00:00"
+    },
+    {
+      "duration": 9000,
+      "end": "2020-06-21T18:30:00",
+      "event": "June Cook-Off 2020",
+      "href": "http://www.codechef.com/COOK119?itm_campaign=contest_listing",
+      "id": 19219684,
+      "resource": {
+        "id": 2,
+        "name": "codechef.com"
+      },
+      "start": "2020-06-21T16:00:00"
+    },
+    {
+      "duration": 9000,
+      "end": "2020-06-01T18:30:00",
+      "event": "Aryan Cook-Off 2020",
+      "href": "http://www.codechef.com/COOK119?itm_campaign=contest_listing",
+      "id": 192196840,
+      "resource": {
+        "id": 20,
+        "name": "codechef.com"
+      },
+      "start": "2020-06-01T07:00:00"
+    },
+    {
+      "duration": 90000,
+      "end": "2020-06-01T18:30:00",
+      "event": "Aryan2 Cook-Off 2020",
+      "href": "http://www.codechef.com/COOK119?itm_campaign=contest_listing",
+      "id": 1921968400,
+      "resource": {
+        "id": 200,
+        "name": "codechef.com"
+      },
+      "start": "2020-06-01T06:20:00"
+    }
+  ]
+}

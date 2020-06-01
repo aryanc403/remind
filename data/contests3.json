@@ -1,0 +1,191 @@
+{
+  "meta": {
+    "limit": 100,
+    "next": "/api/v1/contest/?start__gte=2020-05-31T00%3A00%3A00&username=aryanc403&api_key=mykey&limit=100&offset=100",
+    "offset": 0,
+    "previous": null,
+    "total_count": 116
+  },
+  "objects": [
+    {
+      "duration": 5400,
+      "end": "2020-06-01T05:00:00",
+      "event": "Weekly Contest 1910",
+      "href": "https://leetcode.com/contest/weekly-contest-191",
+      "id": 19995795,
+      "resource": {
+        "id": 1020,
+        "name": "leetcode.com"
+      },
+      "start": "2020-06-01T03:30:00"
+    },
+    {
+      "duration": 7200,
+      "end": "2020-09-05T18:00:00",
+      "event": "TCO20 Round 4",
+      "href": "https://topcoder.com/community/events/",
+      "id": 19473175,
+      "resource": {
+        "id": 12,
+        "name": "topcoder.com"
+      },
+      "start": "2020-09-05T16:00:00"
+    },
+    {
+      "duration": 5400,
+      "end": "2020-05-31T04:00:00",
+      "event": "Weekly Contest 191",
+      "href": "https://leetcode.com/contest/weekly-contest-191",
+      "id": 19995795,
+      "resource": {
+        "id": 102,
+        "name": "leetcode.com"
+      },
+      "start": "2020-05-31T02:30:00"
+    },
+    {
+      "duration": 6000,
+      "end": "2020-05-31T13:40:00",
+      "event": "AtCoder Beginner Contest 169",
+      "href": "https://atcoder.jp/contests/abc169",
+      "id": 19931422,
+      "resource": {
+        "id": 93,
+        "name": "atcoder.jp"
+      },
+      "start": "2020-05-31T12:00:00"
+    },
+    {
+      "duration": 10800,
+      "end": "2020-08-23T06:30:00",
+      "event": "Kick Start Round E",
+      "href": "https://codingcompetitions.withgoogle.com/kickstart/round/000000000019ff47",
+      "id": 16820943,
+      "resource": {
+        "id": 35,
+        "name": "codingcompetitions.withgoogle.com"
+      },
+      "start": "2020-08-23T03:30:00"
+    },
+    {
+      "duration": 7200,
+      "end": "2020-06-21T18:00:00",
+      "event": "SRM 787",
+      "href": "https://topcoder.com/community/events/",
+      "id": 18860080,
+      "resource": {
+        "id": 12,
+        "name": "topcoder.com"
+      },
+      "start": "2020-06-21T16:00:00"
+    },
+    {
+      "duration": 9000,
+      "end": "2020-06-06T16:30:00",
+      "event": "Code Jam Round 3",
+      "href": "https://codingcompetitions.withgoogle.com/codejam/round/000000000019ff7e",
+      "id": 16820936,
+      "resource": {
+        "id": 35,
+        "name": "codingcompetitions.withgoogle.com"
+      },
+      "start": "2020-06-06T14:00:00"
+    },
+    {
+      "duration": 10800,
+      "end": "2020-07-12T08:00:00",
+      "event": "Kick Start Round D",
+      "href": "https://codingcompetitions.withgoogle.com/kickstart/round/000000000019ff08",
+      "id": 16820942,
+      "resource": {
+        "id": 35,
+        "name": "codingcompetitions.withgoogle.com"
+      },
+      "start": "2020-07-12T05:00:00"
+    },
+    {
+      "duration": 7200,
+      "end": "2020-08-01T18:00:00",
+      "event": "TCO20 Round 3A",
+      "href": "https://topcoder.com/community/events/",
+      "id": 19473173,
+      "resource": {
+        "id": 12,
+        "name": "topcoder.com"
+      },
+      "start": "2020-08-01T16:00:00"
+    },
+    {
+      "duration": 864000,
+      "end": "2020-06-15T09:30:00",
+      "event": "June Challenge 2020",
+      "href": "http://www.codechef.com/JUNE20?itm_campaign=contest_listing",
+      "id": 19219680,
+      "resource": {
+        "id": 2,
+        "name": "codechef.com"
+      },
+      "start": "2020-06-05T09:30:00"
+    },
+    {
+      "duration": 7200,
+      "end": "2020-07-18T18:00:00",
+      "event": "TCO20 Round 2B",
+      "href": "https://topcoder.com/community/events/",
+      "id": 19473172,
+      "resource": {
+        "id": 12,
+        "name": "topcoder.com"
+      },
+      "start": "2020-07-18T16:00:00"
+    },
+    {
+      "duration": 9000,
+      "end": "2020-06-21T18:30:00",
+      "event": "June Cook-Off 2020",
+      "href": "http://www.codechef.com/COOK119?itm_campaign=contest_listing",
+      "id": 19219684,
+      "resource": {
+        "id": 2,
+        "name": "codechef.com"
+      },
+      "start": "2020-06-21T16:00:00"
+    },
+    {
+      "duration": 7200,
+      "end": "2020-06-13T14:00:00",
+      "event": "ARC: Tokio Marine & Nichido Fire Insurance Programming Contest 2020",
+      "href": "https://atcoder.jp/contests/tokiomarine2020",
+      "id": 20040643,
+      "resource": {
+        "id": 93,
+        "name": "atcoder.jp"
+      },
+      "start": "2020-06-13T12:00:00"
+    },
+    {
+      "duration": 10800,
+      "end": "2020-06-27T17:00:00",
+      "event": "June Lunchtime 2020",
+      "href": "http://www.codechef.com/LTIME85?itm_campaign=contest_listing",
+      "id": 19219690,
+      "resource": {
+        "id": 2,
+        "name": "codechef.com"
+      },
+      "start": "2020-06-27T14:00:00"
+    },
+    {
+      "duration": 604800,
+      "end": "2020-08-05T17:00:00",
+      "event": "(Stage 1) MM 119",
+      "href": "https://topcoder.com/community/events/",
+      "id": 18859535,
+      "resource": {
+        "id": 12,
+        "name": "topcoder.com"
+      },
+      "start": "2020-07-29T17:00:00"
+    }
+  ]
+}
