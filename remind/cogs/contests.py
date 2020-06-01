@@ -41,7 +41,7 @@ class ContestCogError(commands.CommandError):
 
 
 def _contest_start_time_format(contest, tz):
-    start = contest.start_time
+    start = contest.start_time.replace(tzinfo=dt.timezone.utc).astimezone(tz)
     return f'{start.strftime("%d %b %y, %H:%M")} {tz}'
 
 
