@@ -146,11 +146,17 @@ class Contests(commands.Cog):
         self.role_converter = commands.RoleConverter()
 
         self.logger = logging.getLogger(self.__class__.__name__)
+        self.tasks_started=False
 
     @commands.Cog.listener()
     async def on_ready(self):
         # self._update_task.start()
+        if self.tasks_started:
+            return
+        self.tasks_started=True
+        self.logger.info(f'Starting reminder tasks.')
         asyncio.create_task(self._update_task())
+        self.logger.info(f'Finished reminder tasks.')
 
     # @tasks.task_spec(name='ContestCogUpdate',
     #                  waiter=tasks.Waiter.for_event(events.ContestListRefresh))
