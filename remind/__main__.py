@@ -36,8 +36,6 @@ def setup():
 def main():
     load_dotenv()
     token = os.getenv('BOT_TOKEN_REMIND')
-    GUILD = os.getenv('GUILD_ID')
-    CHANNEL = int(os.getenv('CHANNEL_ID'))
 
     if not token:
         logging.error('Token required')

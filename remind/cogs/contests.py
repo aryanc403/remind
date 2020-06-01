@@ -11,6 +11,7 @@ from collections import defaultdict
 
 import discord
 from discord.ext import commands
+import os
 
 from remind.util import codeforces_common as cf_common
 from remind.util.rounds import Rounds
@@ -32,8 +33,8 @@ _FINISHED_CONTESTS_LIMIT = 5
 localtimezone = pytz.timezone("Asia/Kolkata")
 # (Channel ID, Role ID, [List of Minutes])
 _REMINDER_SETTINGS = (
-    '537077716994883586',
-    '668625146466271233',
+    '53',
+    '66',
     '[180, 60, 10]')
 
 
@@ -129,9 +130,11 @@ class Contests(commands.Cog):
     @commands.Cog.listener()
     async def on_ready(self):
         # self._update_task.start()
+        global _REMINDER_SETTINGS
+        _REMINDER_SETTINGS = ( int(os.getenv('REMIND_CHANNEL_ID')),int(os.getenv('REMIND_ROLE_ID')),_REMINDER_SETTINGS[2])
         if self.tasks_started:
             return
-        self.tasks_started = True
+        self.tasks_started=True
         self.logger.info(f'Starting reminder tasks.')
         asyncio.create_task(self._update_task())
         self.logger.info(f'Finished reminder tasks.')
@@ -140,19 +143,19 @@ class Contests(commands.Cog):
     #                  waiter=tasks.Waiter.for_event(events.ContestListRefresh))
     async def _update_task(self):
         self._generate_contest_cache()
-        contest_cache = self.contest_cache
-        current_time = dt.datetime.utcnow()
+        contest_cache=self.contest_cache
+        current_time=dt.datetime.utcnow()
 
-        self.future_contests = [
+        self.future_contests=[
             contest for contest in contest_cache
             if contest.start_time > current_time
         ]
-        self.finished_contests = [
+        self.finished_contests=[
             contest for contest in contest_cache
             if contest.start_time +
             contest.duration < current_time
         ]
-        self.active_contests = [
+        self.active_contests=[
             contest for contest in contest_cache
             if contest.start_time <= current_time <= contest.start_time + contest.duration
         ]
@@ -165,7 +168,7 @@ class Contests(commands.Cog):
         )
         self.future_contests.sort(key=lambda contest: contest.start_time)
         # Keep most recent _FINISHED_LIMIT
-        self.finished_contests = self.finished_contests[:_FINISHED_CONTESTS_LIMIT]
+        self.finished_contests=self.finished_contests[:_FINISHED_CONTESTS_LIMIT]
         self.start_time_map.clear()
         for contest in self.future_contests:
             self.start_time_map[time.mktime(
@@ -173,11 +176,11 @@ class Contests(commands.Cog):
         self._reschedule_all_tasks()
 
     def _generate_contest_cache(self):
-        db_file = Path(constants.CONTESTS_DB_FILE_PATH)
+        db_file=Path(constants.CONTESTS_DB_FILE_PATH)
         with db_file.open() as f:
-            data = json.load(f)
-        contests = [Rounds(contest) for contest in data['objects']]
-        self.contest_cache = [
+            data=json.load(f)
+        contests=[Rounds(contest) for contest in data['objects']]
+        self.contest_cache=[
             contest for contest in contests
             if contest.is_rated()
         ]
@@ -195,20 +198,20 @@ class Contests(commands.Cog):
             return
         try:
             # settings = cf_common.user_db.get_reminder_settings(guild_id)
-            settings = _REMINDER_SETTINGS
+            settings=_REMINDER_SETTINGS
         except db.DatabaseDisabledError:
             return
         if settings is None:
             return
-        channel_id, role_id, before = settings
-        channel_id, role_id, before = int(
+        channel_id, role_id, before=settings
+        channel_id, role_id, before=int(
             channel_id), int(role_id), json.loads(before)
-        guild = self.bot.get_guild(guild_id)
-        channel, role = guild.get_channel(channel_id), guild.get_role(role_id)
+        guild=self.bot.get_guild(guild_id)
+        channel, role=guild.get_channel(channel_id), guild.get_role(role_id)
         for start_time, contests in self.start_time_map.items():
             for before_mins in before:
-                before_secs = 60 * before_mins
-                task = asyncio.create_task(
+                before_secs=60 * before_mins
+                task=asyncio.create_task(
                     _send_reminder_at(
                         channel,
                         role,
@@ -221,12 +224,12 @@ class Contests(commands.Cog):
         self.logger.info(
             f'{len(self.task_map[guild_id])} tasks scheduled for guild {guild_id}')
 
-    @staticmethod
+    @ staticmethod
     def _make_contest_pages(contests, title):
-        pages = []
-        chunks = paginator.chunkify(contests, _CONTESTS_PER_PAGE)
+        pages=[]
+        chunks=paginator.chunkify(contests, _CONTESTS_PER_PAGE)
         for chunk in chunks:
-            embed = discord_common.cf_color_embed()
+            embed=discord_common.cf_color_embed()
             for name, value in _get_embed_fields_from_contests(chunk):
                 embed.add_field(name=name, value=value, inline=False)
             pages.append((title, embed))
@@ -238,7 +241,7 @@ class Contests(commands.Cog):
         if len(contests) == 0:
             await ctx.send(embed=discord_common.embed_neutral(empty_msg))
             return
-        pages = self._make_contest_pages(contests, title)
+        pages=self._make_contest_pages(contests, title)
         paginator.paginate(
             self.bot,
             ctx.channel,
@@ -247,12 +250,12 @@ class Contests(commands.Cog):
             set_pagenum_footers=True
         )
 
-    @commands.group(brief='Commands for listing contests',
+    @ commands.group(brief='Commands for listing contests',
                     invoke_without_command=True)
     async def clist(self, ctx):
         await ctx.send_help(ctx.command)
 
-    @clist.command(brief='List future contests')
+    @ clist.command(brief='List future contests')
     async def future(self, ctx):
         """List future contests on Codeforces."""
         await self._send_contest_list(ctx, self.future_contests,
@@ -260,7 +263,7 @@ class Contests(commands.Cog):
                                       empty_msg='No future contests scheduled'
                                       )
 
-    @clist.command(brief='List active contests')
+    @ clist.command(brief='List active contests')
     async def active(self, ctx):
         """List active contests on Codeforces, namely those in coding phase, pending system
         test or in system test."""
@@ -269,7 +272,7 @@ class Contests(commands.Cog):
                                       empty_msg='No contests currently active'
                                       )
 
-    @clist.command(brief='List recent finished contests')
+    @ clist.command(brief='List recent finished contests')
     async def finished(self, ctx):
         """List recently concluded contests on Codeforces."""
         await self._send_contest_list(ctx, self.finished_contests,
@@ -279,7 +282,7 @@ class Contests(commands.Cog):
 
     # @discord_common.send_error_if(ContestCogError, rl.RanklistError,
         #   cache_system2.CacheError,  cf_common.ResolveHandleError)
-    @discord_common.send_error_if(ContestCogError)
+    @ discord_common.send_error_if(ContestCogError)
     async def cog_command_error(self, ctx, error):
         pass
 
