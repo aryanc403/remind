@@ -7,8 +7,7 @@ cd "$(dirname "$0")"
 
 while true; do
 
-    python -m remind
-    (( $? != 42 )) && break
+    python -m remind $? != 42 && break
 
     echo '==================================================================='
     echo '=                       Restarting                                ='
