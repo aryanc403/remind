@@ -125,15 +125,12 @@ class Contests(commands.Cog):
         self.role_converter = commands.RoleConverter()
 
         self.logger = logging.getLogger(self.__class__.__name__)
-        self.tasks_started = False
 
     @commands.Cog.listener()
     async def on_ready(self):
         # self._update_task.start()
         global _REMINDER_SETTINGS
         _REMINDER_SETTINGS = ( int(os.getenv('REMIND_CHANNEL_ID')),int(os.getenv('REMIND_ROLE_ID')),_REMINDER_SETTINGS[2])
-        if self.tasks_started:
-            return
         self.tasks_started=True
         self.logger.info(f'Starting reminder tasks.')
         asyncio.create_task(self._update_task())
