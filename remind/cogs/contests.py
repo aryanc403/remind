@@ -37,6 +37,7 @@ _REMINDER_SETTINGS = (
     '66',
     '[180, 60, 10]')
 
+_CODEFORCES_WEBSITE = 'codeforces.com'
 
 class ContestCogError(commands.CommandError):
     pass
@@ -131,7 +132,7 @@ class Contests(commands.Cog):
         # self._update_task.start()
         global _REMINDER_SETTINGS
         _REMINDER_SETTINGS = ( int(os.getenv('REMIND_CHANNEL_ID')),int(os.getenv('REMIND_ROLE_ID')),_REMINDER_SETTINGS[2])
-        self.tasks_started=True
+
         self.logger.info(f'Starting reminder tasks.')
         asyncio.create_task(self._update_task())
         self.logger.info(f'Finished reminder tasks.')
@@ -206,6 +207,11 @@ class Contests(commands.Cog):
         guild=self.bot.get_guild(guild_id)
         channel, role=guild.get_channel(channel_id), guild.get_role(role_id)
         for start_time, contests in self.start_time_map.items():
+
+            # Skip Codeforces reminders. Allow TLE to do this.
+            if contests[0].website==_CODEFORCES_WEBSITE :
+                continue
+
             for before_mins in before:
                 before_secs=60 * before_mins
                 task=asyncio.create_task(
