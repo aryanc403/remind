@@ -68,7 +68,9 @@ class Paginated:
 
         while True:
             try:
-                reaction, user = await bot.wait_for('reaction_add', timeout=wait_time, check=check)
+                reaction, user = await bot.wait_for('reaction_add',
+                                                    timeout=wait_time,
+                                                    check=check)
                 await reaction.remove(user)
                 await self.reaction_map[reaction.emoji]()
             except asyncio.TimeoutError:

@@ -78,8 +78,9 @@ class Meta(commands.Cog):
         message = await ctx.send(':ping_pong: Pong!')
         end = time.perf_counter()
         duration = (end - start) * 1000
-        await message.edit(content=f'REST API latency: {int(duration)}ms\n'
-                                   f'Gateway API latency: {int(self.bot.latency * 1000)}ms')
+        content = f'REST API latency: {int(duration)}ms\n'
+        f'Gateway API latency: {int(self.bot.latency * 1000)}ms'
+        await message.edit(content=content)
 
     @meta.command(brief='Get git information')
     async def git(self, ctx):
@@ -96,7 +97,8 @@ class Meta(commands.Cog):
     @commands.has_role('Admin')
     async def guilds(self, ctx):
         "Replies with info on the bot's guilds"
-        msg = [f'Guild ID: {guild.id} | Name: {guild.name} | Owner: {guild.owner.id} | Icon: {guild.icon_url}'
+        msg = [f'Guild ID: {guild.id} | Name: {guild.name}'
+               f'| Owner: {guild.owner.id} | Icon: {guild.icon_url}'
                for guild in self.bot.guilds]
         await ctx.send('```' + '\n'.join(msg) + '```')
 
@@ -106,8 +108,10 @@ class Meta(commands.Cog):
         "Resets contest cache."
         try:
             clist_api.cache(True)
-            await ctx.send('```' + 'Cache reset compete. Restart to reschedule all contest reminders.' + '```')
-        except:
+            await ctx.send('```Cache reset compete. '
+                           'Restart to reschedule all contest reminders.'
+                           '```')
+        except BaseException:
             await ctx.send('```' + 'Cache reset failed.' + '```')
 
 

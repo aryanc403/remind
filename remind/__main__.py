@@ -65,5 +65,6 @@ def main():
     bot.add_listener(discord_common.bot_error_handler, name='on_command_error')
     bot.run(token)
 
+
 if __name__ == '__main__':
     main()
