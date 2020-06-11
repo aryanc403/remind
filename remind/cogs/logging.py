@@ -21,7 +21,8 @@ class Logging(commands.Cog, logging.Handler):
     async def on_ready(self):
         self.task = asyncio.create_task(self._log_task())
         width = 79
-        stars, msg = f'`{"*" * width}`', f'`***{"Bot running":^{width - 6}}***`'
+        stars = f'`{"*" * width}`'
+        msg = f'`***{"Bot running":^{width - 6}}***`'
         self.logger.log(level=100, msg=stars)
         self.logger.log(level=100, msg=msg)
         self.logger.log(level=100, msg=stars)
@@ -34,7 +35,8 @@ class Logging(commands.Cog, logging.Handler):
                 # Channel no longer exists.
                 root_logger.removeHandler(self)
                 self.logger.warning(
-                    'Logging channel not available, disabling Discord log handler.')
+                    'Logging channel not available,'
+                    'disabling Discord log handler.')
                 break
             try:
                 msg = self.format(record)
@@ -56,7 +58,8 @@ def setup(bot):
     logging_cog_channel_id = os.environ.get('LOGGING_COG_CHANNEL_ID')
     if logging_cog_channel_id is None:
         logger.info(
-            'Skipping installation of logging cog as logging channel is not provided.')
+            'Skipping installation of logging cog'
+            'as logging channel is not provided.')
         return
 
     logging_cog = Logging(bot, int(logging_cog_channel_id))

@@ -38,9 +38,10 @@ def set_author_footer(embed, user):
 
 
 def send_error_if(*error_cls):
-    """Decorator for `cog_command_error` methods. Decorated methods send the error in an alert embed
-    when the error is an instance of one of the specified errors, otherwise the wrapped function is
-    invoked.
+    """Decorator for `cog_command_error` methods.
+    Decorated methods send the error in an alert embed
+    when the error is an instance of one of the specified errors,
+    otherwise the wrapped function is invoked.
     """
     def decorator(func):
         @functools.wraps(func)
@@ -59,15 +60,6 @@ async def bot_error_handler(ctx, exception):
         # Errors already handled in cogs should have .handled = True
         return
 
-    # if isinstance(exception, db.DatabaseDisabledError):
-    #     await ctx.send(embed=embed_alert('Sorry, the database is not available. Some features are disabled.'))
-    # elif isinstance(exception, commands.NoPrivateMessage):
-    #     await ctx.send(embed=embed_alert('Commands are disabled in private channels'))
-    # elif isinstance(exception, commands.DisabledCommand):
-    #     await ctx.send(embed=embed_alert('Sorry, this command is temporarily disabled'))
-    # elif isinstance(exception, cf.CodeforcesApiError):
-    #     await ctx.send(embed=embed_alert(exception))
-    # else:
     exc_info = type(exception), exception, exception.__traceback__
     logger.exception(
         'Ignoring exception in command {}:'.format(
