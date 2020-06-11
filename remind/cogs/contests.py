@@ -135,7 +135,7 @@ class Reminders(commands.Cog):
         self._generate_contest_cache()
         contest_cache = self.contest_cache
         current_time = dt.datetime.utcnow()
-
+ 
         self.future_contests = [
             contest for contest in contest_cache
             if contest.start_time > current_time
