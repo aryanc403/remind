@@ -33,6 +33,8 @@ _REMINDER_SETTINGS = (
     '[180, 60, 10]')
 _CONTEST_REFRESH_PERIOD = 3 * 60 * 60  # seconds
 _CODEFORCES_WEBSITE = 'codeforces.com'
+_PYTZ_TIMEZONES_GIST_URL = ('https://gist.github.com/heyalexej/'
+                            '8bf688fd67d7199be4a1682b3eec7568')
 
 
 class RemindersCogError(commands.CommandError):
@@ -340,10 +342,12 @@ class Reminders(commands.Cog):
         """Sets the server's timezone to the given timezone.
         """
         if not (timezone in pytz.all_timezones):
-            raise RemindersCogError(
-                'The given timezone is invalid.\n\n'
-                'Examples of valid timezones:\n\n' +
-                '\n'.join(random.sample(pytz.all_timezones, 10)))
+            desc = ('The given timezone is invalid\n\n'
+                    'Examples of valid timezones:\n\n')
+            desc += '\n'.join(random.sample(pytz.all_timezones, 5))
+            desc += '\n\nAll valid timezones can be found [here]'
+            desc += f'({_PYTZ_TIMEZONES_GIST_URL})'
+            raise RemindersCogError(desc)
         self.guild_map[ctx.guild.id].localtimezone = pytz.timezone(timezone)
         await ctx.send(embed=discord_common.embed_success(
             f'Succesfully set the server timezone to {timezone}'))
