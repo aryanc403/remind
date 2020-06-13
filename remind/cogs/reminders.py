@@ -314,6 +314,25 @@ class Reminders(commands.Cog):
         await ctx.send(embed=discord_common.embed_success(
             f'Succesfully set the reminder role to {role.mention}'))
 
+    @remind.command(brief='Show reminder settings')
+    async def settings(self, ctx):
+        """Shows the reminders role, channel, times, and timezone settings."""
+        settings = self.guild_map[ctx.guild.id]
+        channel_id, role_id, before, timezone = settings
+        channel = ctx.guild.get_channel(channel_id)
+        role = ctx.guild.get_role(role_id)
+        if channel is None:
+            raise RemindersCogError('No channel set for reminders')
+        if role is None:
+            raise RemindersCogError('No role set for reminders')
+        before_str = ', '.join(str(before_mins) for before_mins in before)
+        embed = discord_common.embed_success('Current reminder settings')
+        embed.add_field(name='Channel', value=channel.mention)
+        embed.add_field(name='Role', value=role.mention)
+        embed.add_field(name='Before',
+                        value=f'At {before_str} mins before contest')
+        await ctx.send(embed=embed)
+
     @commands.command(brief='Set the server\'s timezone',
                       usage=' <timezone>')
     @commands.has_role('Admin')
