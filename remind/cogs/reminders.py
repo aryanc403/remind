@@ -1,4 +1,5 @@
 import asyncio
+import random
 import functools
 import json
 import pickle
@@ -25,7 +26,6 @@ from remind import constants
 _CONTESTS_PER_PAGE = 5
 _CONTEST_PAGINATE_WAIT_TIME = 5 * 60
 _FINISHED_CONTESTS_LIMIT = 5
-localtimezone = pytz.timezone("Asia/Kolkata")
 # (Channel ID, Role ID, [List of Minutes])
 _REMINDER_SETTINGS = (
     '53',
@@ -68,7 +68,7 @@ def _get_formatted_contest_desc(
     return desc
 
 
-def _get_embed_fields_from_contests(contests):
+def _get_embed_fields_from_contests(contests, localtimezone):
     infos = [(contest.name,
               str(contest.id),
               _contest_start_time_format(contest,
@@ -85,7 +85,8 @@ def _get_embed_fields_from_contests(contests):
     return fields
 
 
-async def _send_reminder_at(channel, role, contests, before_secs, send_time):
+async def _send_reminder_at(channel, role, contests, before_secs, send_time,
+                            localtimezone: pytz.timezone):
     delay = send_time - dt.datetime.utcnow().timestamp()
     if delay <= 0:
         return
@@ -101,14 +102,16 @@ async def _send_reminder_at(channel, role, contests, before_secs, send_time):
                           for label, value in zip(labels, values) if value > 0)
     desc = f'About to start in {before_str}'
     embed = discord_common.cf_color_embed(description=desc)
-    for name, value in _get_embed_fields_from_contests(contests):
+    for name, value in _get_embed_fields_from_contests(
+            contests, localtimezone):
         embed.add_field(name=name, value=value)
     await channel.send(role.mention, embed=embed)
 
 
 GuildSettings = recordtype(
     'GuildSettings', [
-        'channel_id', 'role_id', 'before'], default=None)
+        ('channel_id', None), ('role_id', None),
+        ('before', None), ('localtimezone', pytz.timezone('UTC'))])
 
 
 class Reminders(commands.Cog):
@@ -210,7 +213,7 @@ class Reminders(commands.Cog):
         settings = self.guild_map[guild_id]
         if any(setting is None for setting in settings):
             return
-        channel_id, role_id, before = settings
+        channel_id, role_id, before, localtimezone = settings
 
         guild = self.bot.get_guild(guild_id)
         channel, role = guild.get_channel(channel_id), guild.get_role(role_id)
@@ -228,20 +231,21 @@ class Reminders(commands.Cog):
                         contests,
                         before_secs,
                         start_time -
-                        before_secs)
+                        before_secs, localtimezone)
                 )
                 self.task_map[guild_id].append(task)
         self.logger.info(
-            f'{len(self.task_map[guild_id])} \
-                tasks scheduled for guild {guild_id}')
+            f'{len(self.task_map[guild_id])} '
+            f'tasks scheduled for guild {guild_id}')
 
     @staticmethod
-    def _make_contest_pages(contests, title):
+    def _make_contest_pages(contests, title, localtimezone):
         pages = []
         chunks = paginator.chunkify(contests, _CONTESTS_PER_PAGE)
         for chunk in chunks:
             embed = discord_common.cf_color_embed()
-            for name, value in _get_embed_fields_from_contests(chunk):
+            for name, value in _get_embed_fields_from_contests(
+                    chunk, localtimezone):
                 embed.add_field(name=name, value=value, inline=False)
             pages.append((title, embed))
         return pages
@@ -252,7 +256,8 @@ class Reminders(commands.Cog):
         if len(contests) == 0:
             await ctx.send(embed=discord_common.embed_neutral(empty_msg))
             return
-        pages = self._make_contest_pages(contests, title)
+        pages = self._make_contest_pages(
+            contests, title, self.guild_map[ctx.guild.id].localtimezone)
         paginator.paginate(
             self.bot,
             ctx.channel,
@@ -277,6 +282,8 @@ class Reminders(commands.Cog):
         """Sets reminder channel to current channel.
         """
         self.guild_map[ctx.guild.id].channel_id = ctx.channel.id
+        await ctx.send(embed=discord_common.embed_success(
+            f'Succesfully set the reminder channel to {ctx.channel.mention}'))
 
     @remind.command(brief='Set the reminder times',
                     usage='<reminder_times_in_minutes>')
@@ -291,6 +298,8 @@ class Reminders(commands.Cog):
         reminder_times = list(reminder_times)
         reminder_times.sort(reverse=True)
         self.guild_map[ctx.guild.id].before = reminder_times
+        await ctx.send(embed=discord_common.embed_success(
+            'Succesfully set the reminder times to ' + f'{reminder_times}'))
 
     @remind.command(brief='Set the reminder role',
                     usage='<mentionable_role>')
@@ -302,6 +311,23 @@ class Reminders(commands.Cog):
             raise RemindersCogError(
                 'The role for reminders must be mentionable')
         self.guild_map[ctx.guild.id].role_id = role.id
+        await ctx.send(embed=discord_common.embed_success(
+            f'Succesfully set the reminder role to {role.mention}'))
+
+    @commands.command(brief='Set the server\'s timezone',
+                      usage=' <timezone>')
+    @commands.has_role('Admin')
+    async def settz(self, ctx, timezone: str):
+        """Sets the server's timezone to the given timezone.
+        """
+        if not (timezone in pytz.all_timezones):
+            raise RemindersCogError(
+                'The given timezone is invalid.\n\n'
+                'Examples of valid timezones:\n\n' +
+                '\n'.join(random.sample(pytz.all_timezones, 10)))
+        self.guild_map[ctx.guild.id].localtimezone = pytz.timezone(timezone)
+        await ctx.send(embed=discord_common.embed_success(
+            f'Succesfully set the server timezone to {timezone}'))
 
     @commands.group(brief='Commands for listing contests',
                     invoke_without_command=True)
