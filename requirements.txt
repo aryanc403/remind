@@ -2,3 +2,4 @@ python-dotenv
 discord.py==1.2.5
 requests
 pytz
+recordtype
