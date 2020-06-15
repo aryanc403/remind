@@ -18,6 +18,7 @@ from remind.util.rounds import Rounds
 from remind.util import discord_common
 from remind.util import paginator
 from remind import constants
+from remind.util import clist_api as clist
 
 _CONTESTS_PER_PAGE = 5
 _CONTEST_PAGINATE_WAIT_TIME = 5 * 60
@@ -170,6 +171,7 @@ class Reminders(commands.Cog):
         asyncio.create_task(self._update_task())
 
     def _generate_contest_cache(self):
+        clist.cache(forced=False)
         db_file = Path(constants.CONTESTS_DB_FILE_PATH)
         with db_file.open() as f:
             data = json.load(f)
