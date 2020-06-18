@@ -295,6 +295,8 @@ class Reminders(commands.Cog):
     async def before(self, ctx, *reminder_times: int):
         """Sets a reminder `x` minutes before the contests
            for each `x` in `reminder_times`.
+
+           e.g t;remind before 10 60 180
         """
         if not reminder_times or any(
                 reminder_time <= 0 for reminder_time in reminder_times):
@@ -329,6 +331,8 @@ class Reminders(commands.Cog):
             raise RemindersCogError('No channel set for reminders')
         if role is None:
             raise RemindersCogError('No role set for reminders')
+        if before is None:
+            raise RemindersCogError('No reminder_times set for reminders')
         before_str = ', '.join(str(before_mins) for before_mins in before)
         embed = discord_common.embed_success('Current reminder settings')
         embed.add_field(name='Channel', value=channel.mention)
