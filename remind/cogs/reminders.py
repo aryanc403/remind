@@ -27,13 +27,7 @@ from remind.util import clist_api as clist
 _CONTESTS_PER_PAGE = 5
 _CONTEST_PAGINATE_WAIT_TIME = 5 * 60
 _FINISHED_CONTESTS_LIMIT = 5
-# (Channel ID, Role ID, [List of Minutes])
-_REMINDER_SETTINGS = (
-    '53',
-    '66',
-    '[180, 60, 10]')
 _CONTEST_REFRESH_PERIOD = 3 * 60 * 60  # seconds
-_CODEFORCES_WEBSITE = 'codeforces.com'
 _PYTZ_TIMEZONES_GIST_URL = ('https://gist.github.com/heyalexej/'
                             '8bf688fd67d7199be4a1682b3eec7568')
 
@@ -222,9 +216,6 @@ class Reminders(commands.Cog):
         guild = self.bot.get_guild(guild_id)
         channel, role = guild.get_channel(channel_id), guild.get_role(role_id)
         for start_time, contests in self.start_time_map.items():
-            # Skip Codeforces reminders. Allow TLE to do this.
-            if contests[0].website == _CODEFORCES_WEBSITE:
-                continue
 
             for before_mins in before:
                 before_secs = 60 * before_mins
