@@ -121,7 +121,8 @@ _WEBSITES = ['codeforces.com',
 _WEBSITE_ALLOWED_PATTERNS = defaultdict(list)
 _WEBSITE_ALLOWED_PATTERNS['codeforces.com'] = ['']
 _WEBSITE_ALLOWED_PATTERNS['codechef.com'] = ['']
-_WEBSITE_ALLOWED_PATTERNS['atcoder.jp'] = ['abc:', 'arc:', 'agc:', 'grand', 'beginner', 'regular']
+_WEBSITE_ALLOWED_PATTERNS['atcoder.jp'] = [
+    'abc:', 'arc:', 'agc:', 'grand', 'beginner', 'regular']
 _WEBSITE_ALLOWED_PATTERNS['topcoder.com'] = ['srm', 'tco']
 _WEBSITE_ALLOWED_PATTERNS['codingcompetitions.withgoogle.com'] = ['']
 _WEBSITE_ALLOWED_PATTERNS['facebook.com/hackercup'] = ['']
@@ -141,6 +142,7 @@ GuildSettings = recordtype(
         ('before', None), ('localtimezone', pytz.timezone('UTC')),
         ('website_allowed_patterns', _WEBSITE_ALLOWED_PATTERNS),
         ('website_disallowed_patterns', _WEBSITE_DISALLOWED_PATTERNS)])
+
 
 class Reminders(commands.Cog):
     def __init__(self, bot):
@@ -172,9 +174,11 @@ class Reminders(commands.Cog):
                 guild_map = pickle.load(guild_map_file)
                 for guild_id, guild_settings in guild_map.items():
                     self.guild_map[guild_id] = \
-                        GuildSettings(**{key:value for key, value in guild_settings._asdict().items()
-                                        if key in GuildSettings._fields})
-        except:
+                        GuildSettings(**{key: value
+                                         for key, value
+                                         in guild_settings._asdict().items()
+                                         if key in GuildSettings._fields})
+        except BaseException:
             pass
         asyncio.create_task(self._update_task())
 
@@ -227,8 +231,10 @@ class Reminders(commands.Cog):
         with db_file.open() as f:
             data = json.load(f)
         contests = [Round(contest) for contest in data['objects']]
-        self.contest_cache = [contest for contest in contests
-                    if contest.is_desired(_WEBSITE_ALLOWED_PATTERNS, _WEBSITE_DISALLOWED_PATTERNS)]
+        self.contest_cache = [
+            contest for contest in contests if contest.is_desired(
+                _WEBSITE_ALLOWED_PATTERNS,
+                _WEBSITE_DISALLOWED_PATTERNS)]
 
     def _reschedule_all_tasks(self):
         for guild in self.bot.guilds:
@@ -244,13 +250,16 @@ class Reminders(commands.Cog):
         settings = self.guild_map[guild_id]
         if any(setting is None for setting in settings):
             return
-        channel_id, role_id, before, localtimezone, website_allowed_patterns, website_disallowed_patterns = settings
+        channel_id, role_id, before, localtimezone, \
+            website_allowed_patterns, website_disallowed_patterns = settings
 
         guild = self.bot.get_guild(guild_id)
         channel, role = guild.get_channel(channel_id), guild.get_role(role_id)
         for start_time, contests in self.start_time_map.items():
-            contests = [contest for contest in contests \
-                    if contest.is_desired(website_allowed_patterns, website_disallowed_patterns)]
+            contests = [
+                contest for contest in contests if contest.is_desired(
+                    website_allowed_patterns,
+                    website_disallowed_patterns)]
             if not contests:
                 continue
             for before_mins in before:

@@ -23,7 +23,10 @@ class Round:
         st = "(" + st[:-2] + ")"
         return st
 
-    def is_desired(self, website_allowed_patterns, website_disallowed_patterns):
+    def is_desired(
+            self,
+            website_allowed_patterns,
+            website_disallowed_patterns):
         for disallowed_pattern in website_disallowed_patterns[self.website]:
             if disallowed_pattern in self.name.lower():
                 return False
