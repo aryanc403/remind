@@ -120,7 +120,7 @@ _WEBSITES = ['codeforces.com',
 
 _WEBSITE_ALLOWED_PATTERNS = defaultdict(list)
 _WEBSITE_ALLOWED_PATTERNS['codeforces.com'] = ['']
-_WEBSITE_ALLOWED_PATTERNS['codechef.com'] = ['']
+_WEBSITE_ALLOWED_PATTERNS['codechef.com'] = ['lunch', 'cook', 'challenge']
 _WEBSITE_ALLOWED_PATTERNS['atcoder.jp'] = [
     'abc:', 'arc:', 'agc:', 'grand', 'beginner', 'regular']
 _WEBSITE_ALLOWED_PATTERNS['topcoder.com'] = ['srm', 'tco']
@@ -343,6 +343,18 @@ class Reminders(commands.Cog):
         await ctx.send(embed=discord_common.embed_success(
             'Succesfully set the reminder times to ' + f'{reminder_times}'))
 
+    @remind.command(brief='Resets the judges settings to the default ones')
+    @commands.has_role('Admin')
+    async def reset_judges_settings(self, ctx):
+        """ Resets the judges settings to the default ones.
+        """
+        self.guild_map[ctx.guild.id].website_allowed_patterns = \
+            _WEBSITE_ALLOWED_PATTERNS
+        self.guild_map[ctx.guild.id].website_disallowed_patterns = \
+            _WEBSITE_DISALLOWED_PATTERNS
+        await ctx.send(embed=discord_common.embed_success(
+            'Succesfully reset the judges settings to the default ones'))
+
     @remind.command(brief='Set the reminder role',
                     usage='<mentionable_role>')
     @commands.has_role('Admin')
@@ -360,8 +372,8 @@ class Reminders(commands.Cog):
     async def settings(self, ctx):
         """Shows the reminders role, channel, times, and timezone settings."""
         settings = self.guild_map[ctx.guild.id]
-        channel_id, role_id, before, timezone, \
-            website_allowed_patterns, website_disallowed_patterns = settings
+        channel_id, role_id, before, timezone,
+        website_allowed_patterns, website_disallowed_patterns = settings
         channel = ctx.guild.get_channel(channel_id)
         role = ctx.guild.get_role(role_id)
         if channel is None:
