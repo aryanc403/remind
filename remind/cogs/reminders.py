@@ -372,8 +372,8 @@ class Reminders(commands.Cog):
     async def settings(self, ctx):
         """Shows the reminders role, channel, times, and timezone settings."""
         settings = self.guild_map[ctx.guild.id]
-        channel_id, role_id, before, timezone,
-        website_allowed_patterns, website_disallowed_patterns = settings
+        channel_id, role_id, before, timezone, \
+            website_allowed_patterns, website_disallowed_patterns = settings
         channel = ctx.guild.get_channel(channel_id)
         role = ctx.guild.get_role(role_id)
         if channel is None:
