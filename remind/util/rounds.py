@@ -30,8 +30,6 @@ class Round:
         for disallowed_pattern in website_disallowed_patterns[self.website]:
             if disallowed_pattern in self.name.lower():
                 return False
-            if disallowed_pattern in self.url.lower():
-                return False
 
         for allowed_pattern in website_allowed_patterns[self.website]:
             if allowed_pattern in self.name.lower():
