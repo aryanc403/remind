@@ -24,7 +24,7 @@ pip install -r requirements.txt
 
 ### Final steps
 
-To start `remind`, fill up the variables in [env_file_variables.txt](env_file_variables.txt) and rename it to `environment`.
+To start `remind`, fill up the variables in [env_file_variables.txt](env_file_variables.txt) and rename it to `.env`.
 
 You will need to setup a bot on your server before continuing. Follow the directions [here](https://github.com/reactiflux/discord-irc/wiki/Creating-a-discord-bot-&-getting-a-token). Following this, you should have your bot appearing in your server and you should have the Discord bot token.
 
