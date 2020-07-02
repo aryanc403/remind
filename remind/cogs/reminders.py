@@ -33,7 +33,6 @@ _REMINDER_SETTINGS = (
     '66',
     '[180, 60, 10]')
 _CONTEST_REFRESH_PERIOD = 3 * 60 * 60  # seconds
-_CODEFORCES_WEBSITE = 'codeforces.com'
 _PYTZ_TIMEZONES_GIST_URL = ('https://gist.github.com/heyalexej/'
                             '8bf688fd67d7199be4a1682b3eec7568')
 
@@ -109,14 +108,6 @@ async def _send_reminder_at(channel, role, contests, before_secs, send_time,
             contests, localtimezone):
         embed.add_field(name=name, value=value)
     await channel.send(role.mention, embed=embed)
-
-
-_WEBSITES = ['codeforces.com',
-             'codechef.com',
-             'atcoder.jp',
-             'topcoder.com',
-             'codingcompetitions.withgoogle.com',
-             'facebook.com/hackercup']
 
 _WEBSITE_ALLOWED_PATTERNS = defaultdict(list)
 _WEBSITE_ALLOWED_PATTERNS['codeforces.com'] = ['']
