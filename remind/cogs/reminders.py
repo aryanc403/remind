@@ -27,11 +27,6 @@ from remind.util import clist_api as clist
 _CONTESTS_PER_PAGE = 5
 _CONTEST_PAGINATE_WAIT_TIME = 5 * 60
 _FINISHED_CONTESTS_LIMIT = 5
-# (Channel ID, Role ID, [List of Minutes])
-_REMINDER_SETTINGS = (
-    '53',
-    '66',
-    '[180, 60, 10]')
 _CONTEST_REFRESH_PERIOD = 3 * 60 * 60  # seconds
 _PYTZ_TIMEZONES_GIST_URL = ('https://gist.github.com/heyalexej/'
                             '8bf688fd67d7199be4a1682b3eec7568')
