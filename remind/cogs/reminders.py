@@ -18,7 +18,7 @@ from discord.ext import commands
 import os
 
 from remind.util import codeforces_common as cf_common
-from remind.util.rounds import Rounds
+from remind.util.rounds import Round
 from remind.util import discord_common
 from remind.util import paginator
 from remind import constants
@@ -104,11 +104,30 @@ async def _send_reminder_at(channel, role, contests, before_secs, send_time,
         embed.add_field(name=name, value=value)
     await channel.send(role.mention, embed=embed)
 
+_WEBSITE_ALLOWED_PATTERNS = defaultdict(list)
+_WEBSITE_ALLOWED_PATTERNS['codeforces.com'] = ['']
+_WEBSITE_ALLOWED_PATTERNS['codechef.com'] = ['lunch', 'cook', 'challenge']
+_WEBSITE_ALLOWED_PATTERNS['atcoder.jp'] = [
+    'abc:', 'arc:', 'agc:', 'grand', 'beginner', 'regular']
+_WEBSITE_ALLOWED_PATTERNS['topcoder.com'] = ['srm', 'tco']
+_WEBSITE_ALLOWED_PATTERNS['codingcompetitions.withgoogle.com'] = ['']
+_WEBSITE_ALLOWED_PATTERNS['facebook.com/hackercup'] = ['']
+
+_WEBSITE_DISALLOWED_PATTERNS = defaultdict(list)
+_WEBSITE_DISALLOWED_PATTERNS['codeforces.com'] = ['wild', 'fools', 'kotlin']
+_WEBSITE_DISALLOWED_PATTERNS['codechef.com'] = []
+_WEBSITE_DISALLOWED_PATTERNS['atcoder.jp'] = []
+_WEBSITE_DISALLOWED_PATTERNS['topcoder.com'] = []
+_WEBSITE_DISALLOWED_PATTERNS['codingcompetitions.withgoogle.com'] = []
+_WEBSITE_DISALLOWED_PATTERNS['facebook.com/hackercup'] = []
+
 
 GuildSettings = recordtype(
     'GuildSettings', [
         ('channel_id', None), ('role_id', None),
-        ('before', None), ('localtimezone', pytz.timezone('UTC'))])
+        ('before', None), ('localtimezone', pytz.timezone('UTC')),
+        ('website_allowed_patterns', _WEBSITE_ALLOWED_PATTERNS),
+        ('website_disallowed_patterns', _WEBSITE_DISALLOWED_PATTERNS)])
 
 
 class Reminders(commands.Cog):
@@ -138,8 +157,14 @@ class Reminders(commands.Cog):
         guild_map_path = Path(constants.GUILD_SETTINGS_MAP_PATH)
         try:
             with guild_map_path.open('rb') as guild_map_file:
-                self.guild_map = pickle.load(guild_map_file)
-        except FileNotFoundError:
+                guild_map = pickle.load(guild_map_file)
+                for guild_id, guild_settings in guild_map.items():
+                    self.guild_map[guild_id] = \
+                        GuildSettings(**{key: value
+                                         for key, value
+                                         in guild_settings._asdict().items()
+                                         if key in GuildSettings._fields})
+        except BaseException:
             pass
         asyncio.create_task(self._update_task())
 
@@ -191,11 +216,11 @@ class Reminders(commands.Cog):
         db_file = Path(constants.CONTESTS_DB_FILE_PATH)
         with db_file.open() as f:
             data = json.load(f)
-        contests = [Rounds(contest) for contest in data['objects']]
+        contests = [Round(contest) for contest in data['objects']]
         self.contest_cache = [
-            contest for contest in contests
-            if contest.is_rated()
-        ]
+            contest for contest in contests if contest.is_desired(
+                _WEBSITE_ALLOWED_PATTERNS,
+                _WEBSITE_DISALLOWED_PATTERNS)]
 
     def _reschedule_all_tasks(self):
         for guild in self.bot.guilds:
@@ -211,12 +236,18 @@ class Reminders(commands.Cog):
         settings = self.guild_map[guild_id]
         if any(setting is None for setting in settings):
             return
-        channel_id, role_id, before, localtimezone = settings
+        channel_id, role_id, before, localtimezone, \
+            website_allowed_patterns, website_disallowed_patterns = settings
 
         guild = self.bot.get_guild(guild_id)
         channel, role = guild.get_channel(channel_id), guild.get_role(role_id)
         for start_time, contests in self.start_time_map.items():
-
+            contests = [
+                contest for contest in contests if contest.is_desired(
+                    website_allowed_patterns,
+                    website_disallowed_patterns)]
+            if not contests:
+                continue
             for before_mins in before:
                 before_secs = 60 * before_mins
                 task = asyncio.create_task(
@@ -298,6 +329,18 @@ class Reminders(commands.Cog):
         await ctx.send(embed=discord_common.embed_success(
             'Succesfully set the reminder times to ' + f'{reminder_times}'))
 
+    @remind.command(brief='Resets the judges settings to the default ones')
+    @commands.has_role('Admin')
+    async def reset_judges_settings(self, ctx):
+        """ Resets the judges settings to the default ones.
+        """
+        self.guild_map[ctx.guild.id].website_allowed_patterns = \
+            _WEBSITE_ALLOWED_PATTERNS
+        self.guild_map[ctx.guild.id].website_disallowed_patterns = \
+            _WEBSITE_DISALLOWED_PATTERNS
+        await ctx.send(embed=discord_common.embed_success(
+            'Succesfully reset the judges settings to the default ones'))
+
     @remind.command(brief='Set the reminder role',
                     usage='<mentionable_role>')
     @commands.has_role('Admin')
@@ -315,7 +358,8 @@ class Reminders(commands.Cog):
     async def settings(self, ctx):
         """Shows the reminders role, channel, times, and timezone settings."""
         settings = self.guild_map[ctx.guild.id]
-        channel_id, role_id, before, timezone = settings
+        channel_id, role_id, before, timezone, \
+            website_allowed_patterns, website_disallowed_patterns = settings
         channel = ctx.guild.get_channel(channel_id)
         role = ctx.guild.get_role(role_id)
         if channel is None:
