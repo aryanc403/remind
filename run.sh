@@ -5,6 +5,7 @@ cd "$(dirname "$0")"
 
 while true; do
 
+    git pull
     python -m remind
     (( $? != 42 )) && break
 
