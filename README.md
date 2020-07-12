@@ -47,7 +47,7 @@ If you want to just host bot then you can skip installing dependencies and just 
 We are using [autopep8](https://github.com/hhatto/autopep8) for formatting the code.
 
 `pycodestyle .` must generate no errors before accepting the PR.
-Use `autopep8 --in-place --aggressive --aggressive <file name>` for formatting before sending a PR.
+Use `autopep8 --in-place --aggressive <file name>` for formatting before sending a PR.
 
 ## Credits
 
