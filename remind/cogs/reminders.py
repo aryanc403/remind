@@ -106,7 +106,8 @@ async def _send_reminder_at(channel, role, contests, before_secs, send_time,
 
 _WEBSITE_ALLOWED_PATTERNS = defaultdict(list)
 _WEBSITE_ALLOWED_PATTERNS['codeforces.com'] = ['']
-_WEBSITE_ALLOWED_PATTERNS['codechef.com'] = ['lunch', 'cook', 'challenge']
+_WEBSITE_ALLOWED_PATTERNS['codechef.com'] = [
+    'lunch', 'cook', 'challenge', 'rated']
 _WEBSITE_ALLOWED_PATTERNS['atcoder.jp'] = [
     'abc:', 'arc:', 'agc:', 'grand', 'beginner', 'regular']
 _WEBSITE_ALLOWED_PATTERNS['topcoder.com'] = ['srm', 'tco']
@@ -115,7 +116,7 @@ _WEBSITE_ALLOWED_PATTERNS['facebook.com/hackercup'] = ['']
 
 _WEBSITE_DISALLOWED_PATTERNS = defaultdict(list)
 _WEBSITE_DISALLOWED_PATTERNS['codeforces.com'] = ['wild', 'fools', 'kotlin']
-_WEBSITE_DISALLOWED_PATTERNS['codechef.com'] = []
+_WEBSITE_DISALLOWED_PATTERNS['codechef.com'] = ['unrated']
 _WEBSITE_DISALLOWED_PATTERNS['atcoder.jp'] = []
 _WEBSITE_DISALLOWED_PATTERNS['topcoder.com'] = []
 _WEBSITE_DISALLOWED_PATTERNS['codingcompetitions.withgoogle.com'] = []
