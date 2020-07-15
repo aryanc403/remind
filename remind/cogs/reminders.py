@@ -401,7 +401,7 @@ class Reminders(commands.Cog):
 
     @clist.command(brief='List future contests')
     async def future(self, ctx):
-        """List future contests on Codeforces."""
+        """List future contests."""
         await self._send_contest_list(ctx, self.future_contests,
                                       title='Future contests',
                                       empty_msg='No future contests scheduled'
@@ -411,7 +411,7 @@ class Reminders(commands.Cog):
     async def active(self, ctx):
         """List active contests."""
         await self._send_contest_list(ctx, self.active_contests,
-                                      title='Active contests on Codeforces',
+                                      title='Active contests',
                                       empty_msg='No contests currently active'
                                       )
 
