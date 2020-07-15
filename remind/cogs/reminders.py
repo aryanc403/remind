@@ -51,15 +51,13 @@ def _contest_duration_format(contest):
 
 
 def _get_formatted_contest_desc(
-        id_str,
         start,
         duration,
         url,
         max_duration_len):
     em = '\N{EN SPACE}'
     sq = '\N{WHITE SQUARE WITH UPPER RIGHT QUADRANT}'
-    desc = (f'`{em}{id_str}{em}|'
-            f'{em}{start}{em}|'
+    desc = (f'`{em}{start}{em}|'
             f'{em}{duration.rjust(max_duration_len, em)}{em}|'
             f'{em}`[`link {sq}`]({url} "Link to contest page")')
     return desc
@@ -67,17 +65,16 @@ def _get_formatted_contest_desc(
 
 def _get_embed_fields_from_contests(contests, localtimezone):
     infos = [(contest.name,
-              str(contest.id),
               _contest_start_time_format(contest,
                                          localtimezone),
               _contest_duration_format(contest),
               contest.url) for contest in contests]
-    max_duration_len = max(len(duration) for _, _, _, duration, _ in infos)
+    max_duration_len = max(len(duration) for _, _, duration, _ in infos)
 
     fields = []
-    for name, id_str, start, duration, url in infos:
+    for name, start, duration, url in infos:
         value = _get_formatted_contest_desc(
-            id_str, start, duration, url, max_duration_len)
+             start, duration, url, max_duration_len)
         fields.append((name, value))
     return fields
 
