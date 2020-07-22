@@ -1,5 +1,5 @@
 python-dotenv
-discord.py==1.4.0
+discord.py==1.3.4
 requests
 pytz
 recordtype
