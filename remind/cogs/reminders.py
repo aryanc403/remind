@@ -74,7 +74,7 @@ def _get_embed_fields_from_contests(contests, localtimezone):
     fields = []
     for name, start, duration, url in infos:
         value = _get_formatted_contest_desc(
-             start, duration, url, max_duration_len)
+            start, duration, url, max_duration_len)
         fields.append((name, value))
     return fields
 
@@ -112,7 +112,8 @@ _WEBSITE_ALLOWED_PATTERNS['codingcompetitions.withgoogle.com'] = ['']
 _WEBSITE_ALLOWED_PATTERNS['facebook.com/hackercup'] = ['']
 
 _WEBSITE_DISALLOWED_PATTERNS = defaultdict(list)
-_WEBSITE_DISALLOWED_PATTERNS['codeforces.com'] = ['wild', 'fools', 'kotlin', 'unrated']
+_WEBSITE_DISALLOWED_PATTERNS['codeforces.com'] = [
+    'wild', 'fools', 'kotlin', 'unrated']
 _WEBSITE_DISALLOWED_PATTERNS['codechef.com'] = ['unrated']
 _WEBSITE_DISALLOWED_PATTERNS['atcoder.jp'] = []
 _WEBSITE_DISALLOWED_PATTERNS['topcoder.com'] = []
