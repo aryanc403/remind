@@ -388,13 +388,16 @@ class Reminders(commands.Cog):
 
     @remind.command(brief='Subscribe to contest reminders')
     async def on(self, ctx):
-        """Subscribes you to contest reminders. Use 't;remind settings' to see the current settings."""
+        """Subscribes you to contest reminders.
+        Use 't;remind settings' to see the current settings.
+        """
         role = self._get_remind_role(ctx.guild)
         if role in ctx.author.roles:
             embed = discord_common.embed_neutral(
                 'You are already subscribed to contest reminders')
         else:
-            await ctx.author.add_roles(role, reason='User subscribed to contest reminders')
+            await ctx.author.add_roles(
+                role, reason='User subscribed to contest reminders')
             embed = discord_common.embed_success(
                 'Successfully subscribed to contest reminders')
         await ctx.send(embed=embed)
@@ -407,7 +410,8 @@ class Reminders(commands.Cog):
             embed = discord_common.embed_neutral(
                 'You are not subscribed to contest reminders')
         else:
-            await ctx.author.remove_roles(role, reason='User unsubscribed from contest reminders')
+            await ctx.author.remove_roles(
+                role, reason='User unsubscribed from contest reminders')
             embed = discord_common.embed_success(
                 'Successfully unsubscribed from contest reminders')
         await ctx.send(embed=embed)
