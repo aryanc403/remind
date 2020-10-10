@@ -375,6 +375,47 @@ class Reminders(commands.Cog):
                         value=f'At {before_str} mins before contest')
         await ctx.send(embed=embed)
 
+    def _get_remind_role(self, guild):
+        settings = self.guild_map[guild.id]
+        _, role_id, _, _, _, _ = settings
+        if role_id is None:
+            raise RemindersCogError('No role set for reminders')
+        role = guild.get_role(role_id)
+        if role is None:
+            raise RemindersCogError(
+                'The role set for reminders is no longer available.')
+        return role
+
+    @remind.command(brief='Subscribe to contest reminders')
+    async def on(self, ctx):
+        """Subscribes you to contest reminders.
+        Use 't;remind settings' to see the current settings.
+        """
+        role = self._get_remind_role(ctx.guild)
+        if role in ctx.author.roles:
+            embed = discord_common.embed_neutral(
+                'You are already subscribed to contest reminders')
+        else:
+            await ctx.author.add_roles(
+                role, reason='User subscribed to contest reminders')
+            embed = discord_common.embed_success(
+                'Successfully subscribed to contest reminders')
+        await ctx.send(embed=embed)
+
+    @remind.command(brief='Unsubscribe from contest reminders')
+    async def off(self, ctx):
+        """Unsubscribes you from contest reminders."""
+        role = self._get_remind_role(ctx.guild)
+        if role not in ctx.author.roles:
+            embed = discord_common.embed_neutral(
+                'You are not subscribed to contest reminders')
+        else:
+            await ctx.author.remove_roles(
+                role, reason='User unsubscribed from contest reminders')
+            embed = discord_common.embed_success(
+                'Successfully unsubscribed from contest reminders')
+        await ctx.send(embed=embed)
+
     @commands.command(brief='Set the server\'s timezone',
                       usage=' <timezone>')
     @commands.has_role('Admin')
