@@ -104,7 +104,7 @@ async def _send_reminder_at(channel, role, contests, before_secs, send_time,
 _WEBSITE_ALLOWED_PATTERNS = defaultdict(list)
 _WEBSITE_ALLOWED_PATTERNS['codeforces.com'] = ['']
 _WEBSITE_ALLOWED_PATTERNS['codechef.com'] = [
-    'lunch', 'cook', 'challenge', 'rated']
+    'lunch', 'cook', 'rated']
 _WEBSITE_ALLOWED_PATTERNS['atcoder.jp'] = [
     'abc:', 'arc:', 'agc:', 'grand', 'beginner', 'regular']
 _WEBSITE_ALLOWED_PATTERNS['topcoder.com'] = ['srm', 'tco']
