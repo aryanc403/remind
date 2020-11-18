@@ -117,7 +117,8 @@ _WEBSITE_DISALLOWED_PATTERNS['codeforces.com'] = [
 _WEBSITE_DISALLOWED_PATTERNS['codechef.com'] = ['unrated']
 _WEBSITE_DISALLOWED_PATTERNS['atcoder.jp'] = []
 _WEBSITE_DISALLOWED_PATTERNS['topcoder.com'] = []
-_WEBSITE_DISALLOWED_PATTERNS['codingcompetitions.withgoogle.com'] = []
+_WEBSITE_DISALLOWED_PATTERNS['codingcompetitions.withgoogle.com'] = [
+    'registration']
 _WEBSITE_DISALLOWED_PATTERNS['facebook.com/hackercup'] = []
 
 
