@@ -121,6 +121,14 @@ _WEBSITE_DISALLOWED_PATTERNS['codingcompetitions.withgoogle.com'] = [
     'registration']
 _WEBSITE_DISALLOWED_PATTERNS['facebook.com/hackercup'] = []
 
+_SUPPORTED_WEBSITES = [
+    'codeforces.com',
+    'codechef.com',
+    'atcoder.jp',
+    'topcoder.com',
+    'codingcompetitions.withgoogle.com',
+    'facebook.com/hackercup'
+]
 
 GuildSettings = recordtype(
     'GuildSettings', [
@@ -222,6 +230,14 @@ class Reminders(commands.Cog):
                 _WEBSITE_ALLOWED_PATTERNS,
                 _WEBSITE_DISALLOWED_PATTERNS)]
 
+    def get_guild_contests(self, contests, guild_id):
+        settings = self.guild_map[guild_id]
+        _, _, _, _, website_allowed_patterns, website_disallowed_patterns = \
+            settings
+        contests = [contest for contest in contests if contest.is_desired(
+            website_allowed_patterns, website_disallowed_patterns)]
+        return contests
+
     def _reschedule_all_tasks(self):
         for guild in self.bot.guilds:
             self._reschedule_tasks(guild.id)
@@ -242,10 +258,7 @@ class Reminders(commands.Cog):
         guild = self.bot.get_guild(guild_id)
         channel, role = guild.get_channel(channel_id), guild.get_role(role_id)
         for start_time, contests in self.start_time_map.items():
-            contests = [
-                contest for contest in contests if contest.is_desired(
-                    website_allowed_patterns,
-                    website_disallowed_patterns)]
+            contests = self.get_guild_contests(contests, guild_id)
             if not contests:
                 continue
             for before_mins in before:
@@ -417,6 +430,42 @@ class Reminders(commands.Cog):
                 'Successfully unsubscribed from contest reminders')
         await ctx.send(embed=embed)
 
+    @remind.command(brief='Start contest reminders from a website.')
+    async def subscribe(self, ctx, website: str):
+        """Start contest reminders from a website."""
+        role = self._get_remind_role(ctx.guild)
+        if website not in _SUPPORTED_WEBSITES:
+            embed = discord_common.embed_alert(
+                f'{website} is not supported for contest reminders.')
+        else:
+            guild_settings = self.guild_map[ctx.guild.id]
+            guild_settings.website_allowed_patterns[website] = \
+                _WEBSITE_ALLOWED_PATTERNS[website]
+            guild_settings.website_disallowed_patterns[website] = \
+                _WEBSITE_DISALLOWED_PATTERNS[website]
+            self.guild_map[ctx.guild.id] = guild_settings
+            embed = discord_common.embed_success(
+                f'Successfully subscribed from {website} \
+                    or contest reminders.')
+        await ctx.send(embed=embed)
+
+    @remind.command(brief='Stop contest reminders from a website.')
+    async def unsubscribe(self, ctx, website: str):
+        """Stop contest reminders from a website."""
+        role = self._get_remind_role(ctx.guild)
+        if website not in _SUPPORTED_WEBSITES:
+            embed = discord_common.embed_alert(
+                f'{website} is not supported for contest reminders.')
+        else:
+            guild_settings = self.guild_map[ctx.guild.id]
+            del guild_settings.website_allowed_patterns[website]
+            del guild_settings.website_disallowed_patterns[website]
+            self.guild_map[ctx.guild.id] = guild_settings
+            embed = discord_common.embed_success(
+                f'Successfully unsubscribed from {website} \
+                    for contest reminders.')
+        await ctx.send(embed=embed)
+
     @commands.command(brief='Set the server\'s timezone',
                       usage=' <timezone>')
     @commands.has_role('Admin')
@@ -442,7 +491,8 @@ class Reminders(commands.Cog):
     @clist.command(brief='List future contests')
     async def future(self, ctx):
         """List future contests."""
-        await self._send_contest_list(ctx, self.future_contests,
+        contests = self.get_guild_contests(self.future_contests, ctx.guild.id)
+        await self._send_contest_list(ctx, contests,
                                       title='Future contests',
                                       empty_msg='No future contests scheduled'
                                       )
@@ -450,7 +500,8 @@ class Reminders(commands.Cog):
     @clist.command(brief='List active contests')
     async def active(self, ctx):
         """List active contests."""
-        await self._send_contest_list(ctx, self.active_contests,
+        contests = self.get_guild_contests(self.active_contests, ctx.guild.id)
+        await self._send_contest_list(ctx, contests,
                                       title='Active contests',
                                       empty_msg='No contests currently active'
                                       )
@@ -458,7 +509,9 @@ class Reminders(commands.Cog):
     @clist.command(brief='List recent finished contests')
     async def finished(self, ctx):
         """List recently concluded contests."""
-        await self._send_contest_list(ctx, self.finished_contests,
+        contests = self.get_guild_contests(
+            self.finished_contests, ctx.guild.id)
+        await self._send_contest_list(ctx, contests,
                                       title='Recently finished contests',
                                       empty_msg='No finished contests found'
                                       )
