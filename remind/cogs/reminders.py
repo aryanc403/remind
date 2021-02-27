@@ -381,12 +381,17 @@ class Reminders(commands.Cog):
             raise RemindersCogError('No role set for reminders')
         if before is None:
             raise RemindersCogError('No reminder_times set for reminders')
+        subscribed_websites = ", ".join(
+            website for website,
+            patterns in website_allowed_patterns.items() if patterns)
         before_str = ', '.join(str(before_mins) for before_mins in before)
         embed = discord_common.embed_success('Current reminder settings')
         embed.add_field(name='Channel', value=channel.mention)
         embed.add_field(name='Role', value=role.mention)
         embed.add_field(name='Before',
                         value=f'At {before_str} mins before contest')
+        embed.add_field(name='Subscribed websites',
+                        value=f'{subscribed_websites}')
         await ctx.send(embed=embed)
 
     def _get_remind_role(self, guild):
@@ -435,8 +440,10 @@ class Reminders(commands.Cog):
         """Start contest reminders from a website."""
         role = self._get_remind_role(ctx.guild)
         if website not in _SUPPORTED_WEBSITES:
+            supported_websites = ", ".join(_SUPPORTED_WEBSITES)
             embed = discord_common.embed_alert(
-                f'{website} is not supported for contest reminders.')
+                f'{website} is not supported for contest reminders.\n \
+                    Supported websites -\n {supported_websites}.')
         else:
             guild_settings = self.guild_map[ctx.guild.id]
             guild_settings.website_allowed_patterns[website] = \
@@ -446,7 +453,7 @@ class Reminders(commands.Cog):
             self.guild_map[ctx.guild.id] = guild_settings
             embed = discord_common.embed_success(
                 f'Successfully subscribed from {website} \
-                    or contest reminders.')
+                    for contest reminders.')
         await ctx.send(embed=embed)
 
     @remind.command(brief='Stop contest reminders from a website.')
@@ -454,8 +461,10 @@ class Reminders(commands.Cog):
         """Stop contest reminders from a website."""
         role = self._get_remind_role(ctx.guild)
         if website not in _SUPPORTED_WEBSITES:
+            supported_websites = ", ".join(_SUPPORTED_WEBSITES)
             embed = discord_common.embed_alert(
-                f'{website} is not supported for contest reminders.')
+                f'{website} is not supported for contest reminders.\n \
+                    Supported websites -\n {supported_websites}.')
         else:
             guild_settings = self.guild_map[ctx.guild.id]
             del guild_settings.website_allowed_patterns[website]
