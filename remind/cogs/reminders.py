@@ -9,6 +9,7 @@ import datetime as dt
 from pathlib import Path
 from recordtype import recordtype
 import pytz
+import copy
 
 from collections import defaultdict
 from collections import namedtuple
@@ -134,8 +135,17 @@ GuildSettings = recordtype(
     'GuildSettings', [
         ('channel_id', None), ('role_id', None),
         ('before', None), ('localtimezone', pytz.timezone('UTC')),
-        ('website_allowed_patterns', _WEBSITE_ALLOWED_PATTERNS),
-        ('website_disallowed_patterns', _WEBSITE_DISALLOWED_PATTERNS)])
+        ('website_allowed_patterns', defaultdict(list)),
+        ('website_disallowed_patterns', defaultdict(list))])
+
+
+def get_default_guild_settings():
+    allowed_patterns = copy.deepcopy(_WEBSITE_ALLOWED_PATTERNS)
+    disallowed_patterns = copy.deepcopy(_WEBSITE_DISALLOWED_PATTERNS)
+    settings = GuildSettings()
+    settings.website_allowed_patterns = allowed_patterns
+    settings.website_disallowed_patterns = disallowed_patterns
+    return settings
 
 
 class Reminders(commands.Cog):
@@ -149,7 +159,7 @@ class Reminders(commands.Cog):
         self.start_time_map = defaultdict(list)
         self.task_map = defaultdict(list)
         # Maps guild_id to `GuildSettings`
-        self.guild_map = defaultdict(GuildSettings)
+        self.guild_map = defaultdict(get_default_guild_settings)
 
         self.member_converter = commands.MemberConverter()
         self.role_converter = commands.RoleConverter()
@@ -347,10 +357,13 @@ class Reminders(commands.Cog):
     async def reset_judges_settings(self, ctx):
         """ Resets the judges settings to the default ones.
         """
+        _, _, _, _, \
+            website_allowed_patterns, website_disallowed_patterns = \
+            get_default_guild_settings()
         self.guild_map[ctx.guild.id].website_allowed_patterns = \
-            _WEBSITE_ALLOWED_PATTERNS
+            website_allowed_patterns
         self.guild_map[ctx.guild.id].website_disallowed_patterns = \
-            _WEBSITE_DISALLOWED_PATTERNS
+            website_disallowed_patterns
         await ctx.send(embed=discord_common.embed_success(
             'Succesfully reset the judges settings to the default ones'))
 
