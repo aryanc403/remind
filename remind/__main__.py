@@ -12,6 +12,7 @@ from pathlib import Path
 from remind.util import discord_common
 from remind.util import clist_api
 
+from keep_alive import keep_alive
 
 def setup():
     # Make required directories.
@@ -42,6 +43,7 @@ def main():
         return
 
     setup()
+    keep_alive()
 
     intents = discord.Intents.default()
     intents.members = True
