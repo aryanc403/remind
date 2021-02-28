@@ -446,10 +446,10 @@ class Reminders(commands.Cog):
             disallowed_patterns
         self.guild_map[guild_id] = guild_settings
 
-    @remind.command(brief='Start contest reminders from a website.')
+    @remind.command(brief='Start contest reminders from websites.')
     @commands.has_any_role('Admin', constants.REMIND_MODERATOR_ROLE)
     async def subscribe(self, ctx, *websites: str):
-        """Start contest reminders from a website."""
+        """Start contest reminders from websites."""
 
         if all(website not in _SUPPORTED_WEBSITES for website in websites):
             supported_websites = ", ".join(_SUPPORTED_WEBSITES)
@@ -474,10 +474,10 @@ class Reminders(commands.Cog):
                     for contest reminders.')
         await ctx.send(embed=embed)
 
-    @remind.command(brief='Stop contest reminders from a website.')
+    @remind.command(brief='Stop contest reminders from websites.')
     @commands.has_any_role('Admin', constants.REMIND_MODERATOR_ROLE)
     async def unsubscribe(self, ctx, *websites: str):
-        """Stop contest reminders from a website."""
+        """Stop contest reminders from websites."""
 
         if all(website not in _SUPPORTED_WEBSITES for website in websites):
             supported_websites = ", ".join(_SUPPORTED_WEBSITES)
