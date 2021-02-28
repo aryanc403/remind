@@ -41,6 +41,13 @@ def main():
         logging.error('Token required')
         return
 
+    super_users_str = os.getenv('SUPER_USERS')
+
+    if not super_users_str:
+        logging.error('Superusers required')
+        return
+
+    constants.SUPER_USERS = list(map(int, super_users_str.split(",")))
     setup()
 
     intents = discord.Intents.default()

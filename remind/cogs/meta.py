@@ -7,6 +7,7 @@ import textwrap
 from discord.ext import commands
 from remind.util.codeforces_common import pretty_time_format
 from remind.util import clist_api
+from remind import constants
 
 RESTART = 42
 
@@ -45,6 +46,10 @@ def git_history():
         return "Fetching git info failed"
 
 
+def check_if_superuser(ctx):
+    return ctx.author.id in constants.SUPER_USERS
+
+
 class Meta(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
@@ -56,7 +61,7 @@ class Meta(commands.Cog):
         await ctx.send_help(ctx.command)
 
     @meta.command(brief='Restarts TLE')
-    @commands.has_role('Admin')
+    @commands.check(check_if_superuser)
     async def restart(self, ctx):
         """Restarts the bot."""
         # Really, we just exit with a special code
@@ -65,7 +70,7 @@ class Meta(commands.Cog):
         os._exit(RESTART)
 
     @meta.command(brief='Kill TLE')
-    @commands.has_role('Admin')
+    @commands.check(check_if_superuser)
     async def kill(self, ctx):
         """Restarts the bot."""
         await ctx.send('Dying...')
@@ -94,7 +99,7 @@ class Meta(commands.Cog):
                        pretty_time_format(time.time() - self.start_time))
 
     @meta.command(brief='Print bot guilds')
-    @commands.has_role('Admin')
+    @commands.check(check_if_superuser)
     async def guilds(self, ctx):
         "Replies with info on the bot's guilds"
         msg = [f'Guild ID: {guild.id} | Name: {guild.name}'
