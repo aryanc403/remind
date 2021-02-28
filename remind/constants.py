@@ -8,3 +8,4 @@ GUILD_SETTINGS_MAP_PATH = os.path.join(DATA_DIR, 'guild_settings_map')
 ALL_DIRS = (attrib_value for attrib_name, attrib_value in list(
     globals().items()) if attrib_name.endswith('DIR'))
 SUPER_USERS = []
+REMIND_MODERATOR_ROLE = "Remind Moderator"

@@ -326,7 +326,7 @@ class Reminders(commands.Cog):
         await ctx.send_help(ctx.command)
 
     @remind.command(brief='Set reminder settings')
-    @commands.has_role('Admin')
+    @commands.has_any_role('Admin', constants.REMIND_MODERATOR_ROLE)
     async def here(self, ctx, role: discord.Role, *before: int):
         """Sets reminder channel to current channel,
         role to the given role, and reminder
@@ -349,7 +349,7 @@ class Reminders(commands.Cog):
                 'Reminder settings saved successfully'))
 
     @remind.command(brief='Resets the judges settings to the default ones')
-    @commands.has_role('Admin')
+    @commands.has_any_role('Admin', constants.REMIND_MODERATOR_ROLE)
     async def reset_judges_settings(self, ctx):
         """ Resets the judges settings to the default ones.
         """
@@ -447,7 +447,7 @@ class Reminders(commands.Cog):
         self.guild_map[guild_id] = guild_settings
 
     @remind.command(brief='Start contest reminders from a website.')
-    @commands.has_role('Admin')
+    @commands.has_any_role('Admin', constants.REMIND_MODERATOR_ROLE)
     async def subscribe(self, ctx, *websites: str):
         """Start contest reminders from a website."""
 
@@ -475,7 +475,7 @@ class Reminders(commands.Cog):
         await ctx.send(embed=embed)
 
     @remind.command(brief='Stop contest reminders from a website.')
-    @commands.has_role('Admin')
+    @commands.has_any_role('Admin', constants.REMIND_MODERATOR_ROLE)
     async def unsubscribe(self, ctx, *websites: str):
         """Stop contest reminders from a website."""
 
@@ -499,7 +499,7 @@ class Reminders(commands.Cog):
         await ctx.send(embed=embed)
 
     @remind.command(brief='Clear all reminder settings')
-    @commands.has_role('Admin')
+    @commands.has_any_role('Admin', constants.REMIND_MODERATOR_ROLE)
     async def clear(self, ctx):
         del self.guild_map[ctx.guild.id]
         await ctx.send(
@@ -507,7 +507,7 @@ class Reminders(commands.Cog):
 
     @commands.command(brief='Set the server\'s timezone',
                       usage=' <timezone>')
-    @commands.has_role('Admin')
+    @commands.has_any_role('Admin', constants.REMIND_MODERATOR_ROLE)
     async def settz(self, ctx, timezone: str):
         """Sets the server's timezone to the given timezone.
         """

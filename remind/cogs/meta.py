@@ -108,7 +108,7 @@ class Meta(commands.Cog):
         await ctx.send('```' + '\n'.join(msg) + '```')
 
     @meta.command(brief='Forcefully reset contests')
-    @commands.has_role('Admin')
+    @commands.has_any_role('Admin', constants.REMIND_MODERATOR_ROLE)
     async def resetcache(self, ctx):
         "Resets contest cache."
         try:
