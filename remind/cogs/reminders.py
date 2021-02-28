@@ -325,32 +325,28 @@ class Reminders(commands.Cog):
     async def remind(self, ctx):
         await ctx.send_help(ctx.command)
 
-    @remind.command(brief='Set the reminders channel')
+    @remind.command(brief='Set reminder settings')
     @commands.has_role('Admin')
-    async def here(self, ctx):
-        """Sets reminder channel to current channel.
+    async def here(self, ctx, role: discord.Role, *before: int):
+        """Sets reminder channel to current channel,
+        role to the given role, and reminder
+        times to the given values in minutes.
+
+        e.g t;remind here @Subscriber 10 60 180
         """
+        if not role.mentionable:
+            raise RemindersCogError(
+                'The role for reminders must be mentionable')
+        if not before or any(before_mins < 0 for before_mins in before):
+            raise RemindersCogError('Please provide valid `before` values')
+        before = list(before)
+        before = sorted(before, reverse=True)
+        self.guild_map[ctx.guild.id].role_id = role.id
+        self.guild_map[ctx.guild.id].before = before
         self.guild_map[ctx.guild.id].channel_id = ctx.channel.id
-        await ctx.send(embed=discord_common.embed_success(
-            f'Succesfully set the reminder channel to {ctx.channel.mention}'))
-
-    @remind.command(brief='Set the reminder times',
-                    usage='<reminder_times_in_minutes>')
-    @commands.has_role('Admin')
-    async def before(self, ctx, *reminder_times: int):
-        """Sets a reminder `x` minutes before the contests
-           for each `x` in `reminder_times`.
-
-           e.g t;remind before 10 60 180
-        """
-        if not reminder_times or any(
-                reminder_time <= 0 for reminder_time in reminder_times):
-            raise RemindersCogError('Please provide valid `reminder_times`')
-        reminder_times = list(reminder_times)
-        reminder_times.sort(reverse=True)
-        self.guild_map[ctx.guild.id].before = reminder_times
-        await ctx.send(embed=discord_common.embed_success(
-            'Succesfully set the reminder times to ' + f'{reminder_times}'))
+        await ctx.send(
+            embed=discord_common.embed_success(
+                'Reminder settings saved successfully'))
 
     @remind.command(brief='Resets the judges settings to the default ones')
     @commands.has_role('Admin')
@@ -366,19 +362,6 @@ class Reminders(commands.Cog):
             default_disallowed_patterns
         await ctx.send(embed=discord_common.embed_success(
             'Succesfully reset the judges settings to the default ones'))
-
-    @remind.command(brief='Set the reminder role',
-                    usage='<mentionable_role>')
-    @commands.has_role('Admin')
-    async def role(self, ctx, role: discord.Role):
-        """Sets the reminder role to the given role.
-        """
-        if not role.mentionable:
-            raise RemindersCogError(
-                'The role for reminders must be mentionable')
-        self.guild_map[ctx.guild.id].role_id = role.id
-        await ctx.send(embed=discord_common.embed_success(
-            f'Succesfully set the reminder role to {role.mention}'))
 
     @remind.command(brief='Show reminder settings')
     async def settings(self, ctx):
