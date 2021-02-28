@@ -11,7 +11,7 @@ from pathlib import Path
 
 logger = logging.getLogger(__name__)
 URL_BASE = 'https://clist.by/api/v1/contest/'
-_CLIST_API_TIME_DIFFERENCE = 12 * 60 * 60  # seconds
+_CLIST_API_TIME_DIFFERENCE = 30 * 60  # seconds
 
 
 class ClistApiError(commands.CommandError):
