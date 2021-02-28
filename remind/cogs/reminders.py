@@ -464,6 +464,7 @@ class Reminders(commands.Cog):
         self.guild_map[guild_id] = guild_settings
 
     @remind.command(brief='Start contest reminders from a website.')
+    @commands.has_role('Admin')
     async def subscribe(self, ctx, *websites: str):
         """Start contest reminders from a website."""
 
@@ -491,6 +492,7 @@ class Reminders(commands.Cog):
         await ctx.send(embed=embed)
 
     @remind.command(brief='Stop contest reminders from a website.')
+    @commands.has_role('Admin')
     async def unsubscribe(self, ctx, *websites: str):
         """Stop contest reminders from a website."""
 
@@ -512,6 +514,13 @@ class Reminders(commands.Cog):
                 f'Successfully unsubscribed from {unsubscribed_websites_str} \
                     for contest reminders.')
         await ctx.send(embed=embed)
+
+    @remind.command(brief='Clear all reminder settings')
+    @commands.has_role('Admin')
+    async def clear(self, ctx):
+        del self.guild_map[ctx.guild.id]
+        await ctx.send(
+            embed=discord_common.embed_success('Reminder settings cleared'))
 
     @commands.command(brief='Set the server\'s timezone',
                       usage=' <timezone>')
