@@ -397,6 +397,7 @@ class Reminders(commands.Cog):
         subscribed_websites = ", ".join(
             website for website,
             patterns in website_allowed_patterns.items() if patterns)
+        print(website_allowed_patterns)
         before_str = ', '.join(str(before_mins) for before_mins in before)
         embed = discord_common.embed_success('Current reminder settings')
         embed.add_field(name='Channel', value=channel.mention)
@@ -448,43 +449,65 @@ class Reminders(commands.Cog):
                 'Successfully unsubscribed from contest reminders')
         await ctx.send(embed=embed)
 
+    def _set_guild_website_setting(
+            self,
+            guild_id,
+            website,
+            allowed_patterns,
+            disallowed_patterns):
+        guild_settings = self.guild_map[guild_id]
+        guild_settings.website_allowed_patterns[website] = \
+            allowed_patterns
+        guild_settings.website_disallowed_patterns[website] = \
+            disallowed_patterns
+        self.guild_map[guild_id] = guild_settings
+
     @remind.command(brief='Start contest reminders from a website.')
-    async def subscribe(self, ctx, website: str):
+    async def subscribe(self, ctx, *websites: str):
         """Start contest reminders from a website."""
-        role = self._get_remind_role(ctx.guild)
-        if website not in _SUPPORTED_WEBSITES:
+        print([website for website in websites])
+        if all(website not in _SUPPORTED_WEBSITES for website in websites):
             supported_websites = ", ".join(_SUPPORTED_WEBSITES)
             embed = discord_common.embed_alert(
-                f'{website} is not supported for contest reminders.\n \
+                f'None of the website supported for contest reminders.\n \
                     Supported websites -\n {supported_websites}.')
         else:
-            guild_settings = self.guild_map[ctx.guild.id]
-            guild_settings.website_allowed_patterns[website] = \
-                _WEBSITE_ALLOWED_PATTERNS[website]
-            guild_settings.website_disallowed_patterns[website] = \
-                _WEBSITE_DISALLOWED_PATTERNS[website]
-            self.guild_map[ctx.guild.id] = guild_settings
+            guild_id = ctx.guild.id
+            subscribed_websites = []
+            for website in websites:
+                if website not in _SUPPORTED_WEBSITES:
+                    continue
+                self._set_guild_website_setting(
+                    guild_id,
+                    website,
+                    _WEBSITE_ALLOWED_PATTERNS[website],
+                    _WEBSITE_DISALLOWED_PATTERNS[website])
+                subscribed_websites.append(website)
+            subscribed_websites_str = ", ".join(subscribed_websites)
             embed = discord_common.embed_success(
-                f'Successfully subscribed from {website} \
+                f'Successfully subscribed from {subscribed_websites_str} \
                     for contest reminders.')
         await ctx.send(embed=embed)
 
     @remind.command(brief='Stop contest reminders from a website.')
-    async def unsubscribe(self, ctx, website: str):
+    async def unsubscribe(self, ctx, *websites: str):
         """Stop contest reminders from a website."""
-        role = self._get_remind_role(ctx.guild)
-        if website not in _SUPPORTED_WEBSITES:
+        if all(website not in _SUPPORTED_WEBSITES for website in websites):
             supported_websites = ", ".join(_SUPPORTED_WEBSITES)
             embed = discord_common.embed_alert(
-                f'{website} is not supported for contest reminders.\n \
+                f'None of the website supported for contest reminders.\n \
                     Supported websites -\n {supported_websites}.')
         else:
-            guild_settings = self.guild_map[ctx.guild.id]
-            del guild_settings.website_allowed_patterns[website]
-            del guild_settings.website_disallowed_patterns[website]
-            self.guild_map[ctx.guild.id] = guild_settings
+            guild_id = ctx.guild.id
+            unsubscribed_websites = []
+            for website in websites:
+                if website not in _SUPPORTED_WEBSITES:
+                    continue
+                self._set_guild_website_setting(guild_id, website, [], [''])
+                unsubscribed_websites.append(website)
+            unsubscribed_websites_str = ", ".join(unsubscribed_websites)
             embed = discord_common.embed_success(
-                f'Successfully unsubscribed from {website} \
+                f'Successfully unsubscribed from {unsubscribed_websites_str} \
                     for contest reminders.')
         await ctx.send(embed=embed)
 

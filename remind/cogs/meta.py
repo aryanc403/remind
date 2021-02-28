@@ -108,7 +108,7 @@ class Meta(commands.Cog):
         "Resets contest cache."
         try:
             clist_api.cache(True)
-            await ctx.send('```Cache reset compete. '
+            await ctx.send('```Cache reset completed. '
                            'Restart to reschedule all contest reminders.'
                            '```')
         except BaseException:
