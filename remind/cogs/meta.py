@@ -60,7 +60,7 @@ class Meta(commands.Cog):
         """Command the bot or get information about the bot."""
         await ctx.send_help(ctx.command)
 
-    @meta.command(brief='Restarts TLE')
+    @meta.command(brief='Restarts Remind')
     @commands.check(check_if_superuser)
     async def restart(self, ctx):
         """Restarts the bot."""
@@ -69,14 +69,14 @@ class Meta(commands.Cog):
         await ctx.send('Restarting...')
         os._exit(RESTART)
 
-    @meta.command(brief='Kill TLE')
+    @meta.command(brief='Kill Remind')
     @commands.check(check_if_superuser)
     async def kill(self, ctx):
         """Restarts the bot."""
         await ctx.send('Dying...')
         os._exit(0)
 
-    @meta.command(brief='Is TLE up?')
+    @meta.command(brief='Is Remind up?')
     async def ping(self, ctx):
         """Replies to a ping."""
         start = time.perf_counter()
@@ -94,8 +94,8 @@ class Meta(commands.Cog):
 
     @meta.command(brief='Prints bot uptime')
     async def uptime(self, ctx):
-        """Replies with how long TLE has been up."""
-        await ctx.send('TLE has been running for ' +
+        """Replies with how long Remind has been up."""
+        await ctx.send('Remind has been running for ' +
                        pretty_time_format(time.time() - self.start_time))
 
     @meta.command(brief='Print bot guilds')
