@@ -358,12 +358,12 @@ class Reminders(commands.Cog):
         """ Resets the judges settings to the default ones.
         """
         _, _, _, _, \
-            website_allowed_patterns, website_disallowed_patterns = \
+            default_allowed_patterns, default_disallowed_patterns = \
             get_default_guild_settings()
         self.guild_map[ctx.guild.id].website_allowed_patterns = \
-            website_allowed_patterns
+            default_allowed_patterns
         self.guild_map[ctx.guild.id].website_disallowed_patterns = \
-            website_disallowed_patterns
+            default_disallowed_patterns
         await ctx.send(embed=discord_common.embed_success(
             'Succesfully reset the judges settings to the default ones'))
 
@@ -394,10 +394,11 @@ class Reminders(commands.Cog):
             raise RemindersCogError('No role set for reminders')
         if before is None:
             raise RemindersCogError('No reminder_times set for reminders')
-        subscribed_websites = ", ".join(
+
+        subscribed_websites_str = ", ".join(
             website for website,
             patterns in website_allowed_patterns.items() if patterns)
-        print(website_allowed_patterns)
+
         before_str = ', '.join(str(before_mins) for before_mins in before)
         embed = discord_common.embed_success('Current reminder settings')
         embed.add_field(name='Channel', value=channel.mention)
@@ -405,7 +406,7 @@ class Reminders(commands.Cog):
         embed.add_field(name='Before',
                         value=f'At {before_str} mins before contest')
         embed.add_field(name='Subscribed websites',
-                        value=f'{subscribed_websites}')
+                        value=f'{subscribed_websites_str}')
         await ctx.send(embed=embed)
 
     def _get_remind_role(self, guild):
@@ -465,7 +466,7 @@ class Reminders(commands.Cog):
     @remind.command(brief='Start contest reminders from a website.')
     async def subscribe(self, ctx, *websites: str):
         """Start contest reminders from a website."""
-        print([website for website in websites])
+
         if all(website not in _SUPPORTED_WEBSITES for website in websites):
             supported_websites = ", ".join(_SUPPORTED_WEBSITES)
             embed = discord_common.embed_alert(
@@ -492,6 +493,7 @@ class Reminders(commands.Cog):
     @remind.command(brief='Stop contest reminders from a website.')
     async def unsubscribe(self, ctx, *websites: str):
         """Stop contest reminders from a website."""
+
         if all(website not in _SUPPORTED_WEBSITES for website in websites):
             supported_websites = ", ".join(_SUPPORTED_WEBSITES)
             embed = discord_common.embed_alert(
