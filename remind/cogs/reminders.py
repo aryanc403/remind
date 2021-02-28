@@ -454,8 +454,8 @@ class Reminders(commands.Cog):
         if all(website not in _SUPPORTED_WEBSITES for website in websites):
             supported_websites = ", ".join(_SUPPORTED_WEBSITES)
             embed = discord_common.embed_alert(
-                f'None of the website supported for contest reminders.\n \
-                    Supported websites -\n {supported_websites}.')
+                f'None of these websites are supported for contest reminders.'
+                f'\nSupported websites -\n {supported_websites}.')
         else:
             guild_id = ctx.guild.id
             subscribed_websites = []
@@ -482,8 +482,8 @@ class Reminders(commands.Cog):
         if all(website not in _SUPPORTED_WEBSITES for website in websites):
             supported_websites = ", ".join(_SUPPORTED_WEBSITES)
             embed = discord_common.embed_alert(
-                f'None of the website supported for contest reminders.\n \
-                    Supported websites -\n {supported_websites}.')
+                f'None of these websites are supported for contest reminders.'
+                f'\nSupported websites -\n {supported_websites}.')
         else:
             guild_id = ctx.guild.id
             unsubscribed_websites = []
