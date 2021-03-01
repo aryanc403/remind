@@ -8,7 +8,6 @@ from discord.ext import commands
 
 logger = logging.getLogger(__name__)
 
-_CF_COLORS = (0xFFCA1F, 0x198BCC, 0xFF2020)
 _SUCCESS_GREEN = 0x28A745
 _ALERT_AMBER = 0xFFBF00
 
@@ -23,10 +22,6 @@ def embed_success(desc):
 
 def embed_alert(desc):
     return discord.Embed(description=str(desc), color=_ALERT_AMBER)
-
-
-def cf_color_embed(**kwargs):
-    return discord.Embed(**kwargs, color=random.choice(_CF_COLORS))
 
 
 def attach_image(embed, img_file):
@@ -53,6 +48,32 @@ def send_error_if(*error_cls):
                 await func(cog, ctx, error)
         return wrapper
     return decorator
+
+
+def once(func):
+    """Decorator that wraps the given async function such that it is executed only once."""
+    first = True
+    @functools.wraps(func)
+    async def wrapper(*args, **kwargs):
+        nonlocal first
+        if first:
+            first = False
+            await func(*args, **kwargs)
+
+    return wrapper
+
+
+def on_ready_event_once(bot):
+    """Decorator that uses bot.event to set the given function as the bot's on_ready event handler,
+    but does not execute it more than once.
+    """
+    def register_on_ready(func):
+        @bot.event
+        @once
+        async def on_ready():
+            await func()
+
+    return register_on_ready
 
 
 async def bot_error_handler(ctx, exception):
