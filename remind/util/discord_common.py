@@ -51,8 +51,10 @@ def send_error_if(*error_cls):
 
 
 def once(func):
-    """Decorator that wraps the given async function such that it is executed only once."""
+    """Decorator that wraps the given async function
+    such that it is executed only once."""
     first = True
+
     @functools.wraps(func)
     async def wrapper(*args, **kwargs):
         nonlocal first
@@ -64,7 +66,8 @@ def once(func):
 
 
 def on_ready_event_once(bot):
-    """Decorator that uses bot.event to set the given function as the bot's on_ready event handler,
+    """Decorator that uses bot.event to set the given function
+    as the bot's on_ready event handler,
     but does not execute it more than once.
     """
     def register_on_ready(func):
