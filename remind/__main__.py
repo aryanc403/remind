@@ -35,11 +35,21 @@ def setup():
 
 def main():
     load_dotenv()
-    token = os.getenv('BOT_TOKEN_REMIND')
 
+    token = os.getenv('BOT_TOKEN_REMIND')
     if not token:
         logging.error('Token required')
         return
+
+    super_users_str = os.getenv('SUPER_USERS')
+    if not super_users_str:
+        logging.error('Superusers required')
+        return
+    constants.SUPER_USERS = list(map(int, super_users_str.split(",")))
+
+    remind_moderator_role = os.getenv('REMIND_MODERATOR_ROLE')
+    if remind_moderator_role:
+        constants.REMIND_MODERATOR_ROLE = remind_moderator_role
 
     setup()
 
