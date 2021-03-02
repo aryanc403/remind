@@ -7,6 +7,7 @@ import textwrap
 from discord.ext import commands
 from remind.util.codeforces_common import pretty_time_format
 from remind.util import clist_api
+from remind import constants
 
 RESTART = 42
 
@@ -45,6 +46,10 @@ def git_history():
         return "Fetching git info failed"
 
 
+def check_if_superuser(ctx):
+    return ctx.author.id in constants.SUPER_USERS
+
+
 class Meta(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
@@ -55,8 +60,8 @@ class Meta(commands.Cog):
         """Command the bot or get information about the bot."""
         await ctx.send_help(ctx.command)
 
-    @meta.command(brief='Restarts TLE')
-    @commands.has_role('Admin')
+    @meta.command(brief='Restarts Remind')
+    @commands.check(check_if_superuser)
     async def restart(self, ctx):
         """Restarts the bot."""
         # Really, we just exit with a special code
@@ -64,14 +69,14 @@ class Meta(commands.Cog):
         await ctx.send('Restarting...')
         os._exit(RESTART)
 
-    @meta.command(brief='Kill TLE')
-    @commands.has_role('Admin')
+    @meta.command(brief='Kill Remind')
+    @commands.check(check_if_superuser)
     async def kill(self, ctx):
         """Restarts the bot."""
         await ctx.send('Dying...')
         os._exit(0)
 
-    @meta.command(brief='Is TLE up?')
+    @meta.command(brief='Is Remind up?')
     async def ping(self, ctx):
         """Replies to a ping."""
         start = time.perf_counter()
@@ -89,12 +94,12 @@ class Meta(commands.Cog):
 
     @meta.command(brief='Prints bot uptime')
     async def uptime(self, ctx):
-        """Replies with how long TLE has been up."""
-        await ctx.send('TLE has been running for ' +
+        """Replies with how long Remind has been up."""
+        await ctx.send('Remind has been running for ' +
                        pretty_time_format(time.time() - self.start_time))
 
     @meta.command(brief='Print bot guilds')
-    @commands.has_role('Admin')
+    @commands.check(check_if_superuser)
     async def guilds(self, ctx):
         "Replies with info on the bot's guilds"
         msg = [f'Guild ID: {guild.id} | Name: {guild.name}'
@@ -103,12 +108,12 @@ class Meta(commands.Cog):
         await ctx.send('```' + '\n'.join(msg) + '```')
 
     @meta.command(brief='Forcefully reset contests')
-    @commands.has_role('Admin')
+    @commands.has_any_role('Admin', constants.REMIND_MODERATOR_ROLE)
     async def resetcache(self, ctx):
         "Resets contest cache."
         try:
             clist_api.cache(True)
-            await ctx.send('```Cache reset compete. '
+            await ctx.send('```Cache reset completed. '
                            'Restart to reschedule all contest reminders.'
                            '```')
         except BaseException:

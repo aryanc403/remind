@@ -9,6 +9,7 @@ import datetime as dt
 from pathlib import Path
 from recordtype import recordtype
 import pytz
+import copy
 
 from collections import defaultdict
 from collections import namedtuple
@@ -27,7 +28,9 @@ from remind.util import clist_api as clist
 _CONTESTS_PER_PAGE = 5
 _CONTEST_PAGINATE_WAIT_TIME = 5 * 60
 _FINISHED_CONTESTS_LIMIT = 5
-_CONTEST_REFRESH_PERIOD = 3 * 60 * 60  # seconds
+_CONTEST_REFRESH_PERIOD = 10 * 60  # seconds
+_GUILD_SETTINGS_BACKUP_PERIOD = 6 * 60 * 60  # seconds
+
 _PYTZ_TIMEZONES_GIST_URL = ('https://gist.github.com/heyalexej/'
                             '8bf688fd67d7199be4a1682b3eec7568')
 
@@ -121,19 +124,35 @@ _WEBSITE_DISALLOWED_PATTERNS['codingcompetitions.withgoogle.com'] = [
     'registration']
 _WEBSITE_DISALLOWED_PATTERNS['facebook.com/hackercup'] = []
 
+_SUPPORTED_WEBSITES = [
+    'codeforces.com',
+    'codechef.com',
+    'atcoder.jp',
+    'topcoder.com',
+    'codingcompetitions.withgoogle.com',
+    'facebook.com/hackercup'
+]
 
 GuildSettings = recordtype(
     'GuildSettings', [
         ('channel_id', None), ('role_id', None),
         ('before', None), ('localtimezone', pytz.timezone('UTC')),
-        ('website_allowed_patterns', _WEBSITE_ALLOWED_PATTERNS),
-        ('website_disallowed_patterns', _WEBSITE_DISALLOWED_PATTERNS)])
+        ('website_allowed_patterns', defaultdict(list)),
+        ('website_disallowed_patterns', defaultdict(list))])
+
+
+def get_default_guild_settings():
+    allowed_patterns = copy.deepcopy(_WEBSITE_ALLOWED_PATTERNS)
+    disallowed_patterns = copy.deepcopy(_WEBSITE_DISALLOWED_PATTERNS)
+    settings = GuildSettings()
+    settings.website_allowed_patterns = allowed_patterns
+    settings.website_disallowed_patterns = disallowed_patterns
+    return settings
 
 
 class Reminders(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-        self.running = False
         self.future_contests = None
         self.contest_cache = None
         self.active_contests = None
@@ -141,7 +160,8 @@ class Reminders(commands.Cog):
         self.start_time_map = defaultdict(list)
         self.task_map = defaultdict(list)
         # Maps guild_id to `GuildSettings`
-        self.guild_map = defaultdict(GuildSettings)
+        self.guild_map = defaultdict(get_default_guild_settings)
+        self.last_guild_backup_time = -1
 
         self.member_converter = commands.MemberConverter()
         self.role_converter = commands.RoleConverter()
@@ -149,11 +169,8 @@ class Reminders(commands.Cog):
         self.logger = logging.getLogger(self.__class__.__name__)
 
     @commands.Cog.listener()
+    @discord_common.once
     async def on_ready(self):
-        if self.running:
-            return
-        # To avoid re-initializing if discord is reconnected.
-        self.running = True
         guild_map_path = Path(constants.GUILD_SETTINGS_MAP_PATH)
         try:
             with guild_map_path.open('rb') as guild_map_file:
@@ -170,6 +187,7 @@ class Reminders(commands.Cog):
 
     async def cog_after_invoke(self, ctx):
         self._serialize_guild_map()
+        self._backup_serialize_guild_map()
         self._reschedule_tasks(ctx.guild.id)
 
     async def _update_task(self):
@@ -222,6 +240,14 @@ class Reminders(commands.Cog):
                 _WEBSITE_ALLOWED_PATTERNS,
                 _WEBSITE_DISALLOWED_PATTERNS)]
 
+    def get_guild_contests(self, contests, guild_id):
+        settings = self.guild_map[guild_id]
+        _, _, _, _, website_allowed_patterns, website_disallowed_patterns = \
+            settings
+        contests = [contest for contest in contests if contest.is_desired(
+            website_allowed_patterns, website_disallowed_patterns)]
+        return contests
+
     def _reschedule_all_tasks(self):
         for guild in self.bot.guilds:
             self._reschedule_tasks(guild.id)
@@ -242,10 +268,7 @@ class Reminders(commands.Cog):
         guild = self.bot.get_guild(guild_id)
         channel, role = guild.get_channel(channel_id), guild.get_role(role_id)
         for start_time, contests in self.start_time_map.items():
-            contests = [
-                contest for contest in contests if contest.is_desired(
-                    website_allowed_patterns,
-                    website_disallowed_patterns)]
+            contests = self.get_guild_contests(contests, guild_id)
             if not contests:
                 continue
             for before_mins in before:
@@ -297,62 +320,61 @@ class Reminders(commands.Cog):
         with out_path.open(mode='wb') as out_file:
             pickle.dump(self.guild_map, out_file)
 
+    def _backup_serialize_guild_map(self):
+        current_time_stamp = int(dt.datetime.utcnow().timestamp())
+        if current_time_stamp - self.last_guild_backup_time \
+                < _GUILD_SETTINGS_BACKUP_PERIOD:
+            return
+        self.last_guild_backup_time = current_time_stamp
+        out_path = Path(
+            constants.GUILD_SETTINGS_MAP_PATH +
+            "_" +
+            str(current_time_stamp))
+        with out_path.open(mode='wb') as out_file:
+            pickle.dump(self.guild_map, out_file)
+
     @commands.group(brief='Commands for contest reminders',
                     invoke_without_command=True)
     async def remind(self, ctx):
         await ctx.send_help(ctx.command)
 
-    @remind.command(brief='Set the reminders channel')
-    @commands.has_role('Admin')
-    async def here(self, ctx):
-        """Sets reminder channel to current channel.
-        """
-        self.guild_map[ctx.guild.id].channel_id = ctx.channel.id
-        await ctx.send(embed=discord_common.embed_success(
-            f'Succesfully set the reminder channel to {ctx.channel.mention}'))
+    @remind.command(brief='Set reminder settings')
+    @commands.has_any_role('Admin', constants.REMIND_MODERATOR_ROLE)
+    async def here(self, ctx, role: discord.Role, *before: int):
+        """Sets reminder channel to current channel,
+        role to the given role, and reminder
+        times to the given values in minutes.
 
-    @remind.command(brief='Set the reminder times',
-                    usage='<reminder_times_in_minutes>')
-    @commands.has_role('Admin')
-    async def before(self, ctx, *reminder_times: int):
-        """Sets a reminder `x` minutes before the contests
-           for each `x` in `reminder_times`.
-
-           e.g t;remind before 10 60 180
-        """
-        if not reminder_times or any(
-                reminder_time <= 0 for reminder_time in reminder_times):
-            raise RemindersCogError('Please provide valid `reminder_times`')
-        reminder_times = list(reminder_times)
-        reminder_times.sort(reverse=True)
-        self.guild_map[ctx.guild.id].before = reminder_times
-        await ctx.send(embed=discord_common.embed_success(
-            'Succesfully set the reminder times to ' + f'{reminder_times}'))
-
-    @remind.command(brief='Resets the judges settings to the default ones')
-    @commands.has_role('Admin')
-    async def reset_judges_settings(self, ctx):
-        """ Resets the judges settings to the default ones.
-        """
-        self.guild_map[ctx.guild.id].website_allowed_patterns = \
-            _WEBSITE_ALLOWED_PATTERNS
-        self.guild_map[ctx.guild.id].website_disallowed_patterns = \
-            _WEBSITE_DISALLOWED_PATTERNS
-        await ctx.send(embed=discord_common.embed_success(
-            'Succesfully reset the judges settings to the default ones'))
-
-    @remind.command(brief='Set the reminder role',
-                    usage='<mentionable_role>')
-    @commands.has_role('Admin')
-    async def role(self, ctx, role: discord.Role):
-        """Sets the reminder role to the given role.
+        e.g t;remind here @Subscriber 10 60 180
         """
         if not role.mentionable:
             raise RemindersCogError(
                 'The role for reminders must be mentionable')
+        if not before or any(before_mins < 0 for before_mins in before):
+            raise RemindersCogError('Please provide valid `before` values')
+        before = list(before)
+        before = sorted(before, reverse=True)
         self.guild_map[ctx.guild.id].role_id = role.id
+        self.guild_map[ctx.guild.id].before = before
+        self.guild_map[ctx.guild.id].channel_id = ctx.channel.id
+        await ctx.send(
+            embed=discord_common.embed_success(
+                'Reminder settings saved successfully'))
+
+    @remind.command(brief='Resets the judges settings to the default ones')
+    @commands.has_any_role('Admin', constants.REMIND_MODERATOR_ROLE)
+    async def reset_judges_settings(self, ctx):
+        """ Resets the judges settings to the default ones.
+        """
+        _, _, _, _, \
+            default_allowed_patterns, default_disallowed_patterns = \
+            get_default_guild_settings()
+        self.guild_map[ctx.guild.id].website_allowed_patterns = \
+            default_allowed_patterns
+        self.guild_map[ctx.guild.id].website_disallowed_patterns = \
+            default_disallowed_patterns
         await ctx.send(embed=discord_common.embed_success(
-            f'Succesfully set the reminder role to {role.mention}'))
+            'Succesfully reset the judges settings to the default ones'))
 
     @remind.command(brief='Show reminder settings')
     async def settings(self, ctx):
@@ -368,12 +390,19 @@ class Reminders(commands.Cog):
             raise RemindersCogError('No role set for reminders')
         if before is None:
             raise RemindersCogError('No reminder_times set for reminders')
+
+        subscribed_websites_str = ", ".join(
+            website for website,
+            patterns in website_allowed_patterns.items() if patterns)
+
         before_str = ', '.join(str(before_mins) for before_mins in before)
         embed = discord_common.embed_success('Current reminder settings')
         embed.add_field(name='Channel', value=channel.mention)
         embed.add_field(name='Role', value=role.mention)
         embed.add_field(name='Before',
                         value=f'At {before_str} mins before contest')
+        embed.add_field(name='Subscribed websites',
+                        value=f'{subscribed_websites_str}')
         await ctx.send(embed=embed)
 
     def _get_remind_role(self, guild):
@@ -417,9 +446,89 @@ class Reminders(commands.Cog):
                 'Successfully unsubscribed from contest reminders')
         await ctx.send(embed=embed)
 
+    def _set_guild_setting(
+            self,
+            guild_id,
+            websites,
+            allowed_patterns,
+            disallowed_patterns):
+
+        guild_settings = self.guild_map[guild_id]
+        supported_websites, unsupported_websites = [], []
+        for website in websites:
+            if website not in _SUPPORTED_WEBSITES:
+                unsupported_websites.append(website)
+                continue
+
+            guild_settings.website_allowed_patterns[website] = \
+                allowed_patterns[website]
+            guild_settings.website_disallowed_patterns[website] = \
+                disallowed_patterns[website]
+            supported_websites.append(website)
+
+        self.guild_map[guild_id] = guild_settings
+        return supported_websites, unsupported_websites
+
+    @remind.command(brief='Start contest reminders from websites.')
+    @commands.has_any_role('Admin', constants.REMIND_MODERATOR_ROLE)
+    async def subscribe(self, ctx, *websites: str):
+        """Start contest reminders from websites."""
+
+        if all(website not in _SUPPORTED_WEBSITES for website in websites):
+            supported_websites = ", ".join(_SUPPORTED_WEBSITES)
+            embed = discord_common.embed_alert(
+                f'None of these websites are supported for contest reminders.'
+                f'\nSupported websites -\n {supported_websites}.')
+        else:
+            guild_id = ctx.guild.id
+            subscribed, unsupported = self._set_guild_setting(
+                guild_id, websites, _WEBSITE_ALLOWED_PATTERNS,
+                _WEBSITE_DISALLOWED_PATTERNS)
+            subscribed_websites_str = ", ".join(subscribed)
+            unsupported_websites_str = ", ".join(unsupported)
+            success_str = f'Successfully subscribed from \
+                    {subscribed_websites_str} for contest reminders.'
+            success_str += f'\n{unsupported_websites_str} \
+                {"are" if len(unsupported)>1 else "is"} \
+                not supported.' if unsupported_websites_str else ""
+            embed = discord_common.embed_success(success_str)
+        await ctx.send(embed=embed)
+
+    @remind.command(brief='Stop contest reminders from websites.')
+    @commands.has_any_role('Admin', constants.REMIND_MODERATOR_ROLE)
+    async def unsubscribe(self, ctx, *websites: str):
+        """Stop contest reminders from websites."""
+
+        if all(website not in _SUPPORTED_WEBSITES for website in websites):
+            supported_websites = ", ".join(_SUPPORTED_WEBSITES)
+            embed = discord_common.embed_alert(
+                f'None of these websites are supported for contest reminders.'
+                f'\nSupported websites -\n {supported_websites}.')
+        else:
+            guild_id = ctx.guild.id
+            unsubscribed, unsupported = self._set_guild_setting(
+                guild_id, websites,
+                defaultdict(list), defaultdict(lambda: ['']))
+            unsubscribed_websites_str = ", ".join(unsubscribed)
+            unsupported_websites_str = ", ".join(unsupported)
+            success_str = f'Successfully unsubscribed from \
+                    {unsubscribed_websites_str} for contest reminders.'
+            success_str += f'\n{unsupported_websites_str} \
+                {"are" if len(unsupported)>1 else "is"} \
+                not supported.' if unsupported_websites_str else ""
+            embed = discord_common.embed_success(success_str)
+        await ctx.send(embed=embed)
+
+    @remind.command(brief='Clear all reminder settings')
+    @commands.has_any_role('Admin', constants.REMIND_MODERATOR_ROLE)
+    async def clear(self, ctx):
+        del self.guild_map[ctx.guild.id]
+        await ctx.send(
+            embed=discord_common.embed_success('Reminder settings cleared'))
+
     @commands.command(brief='Set the server\'s timezone',
                       usage=' <timezone>')
-    @commands.has_role('Admin')
+    @commands.has_any_role('Admin', constants.REMIND_MODERATOR_ROLE)
     async def settz(self, ctx, timezone: str):
         """Sets the server's timezone to the given timezone.
         """
@@ -442,7 +551,8 @@ class Reminders(commands.Cog):
     @clist.command(brief='List future contests')
     async def future(self, ctx):
         """List future contests."""
-        await self._send_contest_list(ctx, self.future_contests,
+        contests = self.get_guild_contests(self.future_contests, ctx.guild.id)
+        await self._send_contest_list(ctx, contests,
                                       title='Future contests',
                                       empty_msg='No future contests scheduled'
                                       )
@@ -450,7 +560,8 @@ class Reminders(commands.Cog):
     @clist.command(brief='List active contests')
     async def active(self, ctx):
         """List active contests."""
-        await self._send_contest_list(ctx, self.active_contests,
+        contests = self.get_guild_contests(self.active_contests, ctx.guild.id)
+        await self._send_contest_list(ctx, contests,
                                       title='Active contests',
                                       empty_msg='No contests currently active'
                                       )
@@ -458,7 +569,9 @@ class Reminders(commands.Cog):
     @clist.command(brief='List recent finished contests')
     async def finished(self, ctx):
         """List recently concluded contests."""
-        await self._send_contest_list(ctx, self.finished_contests,
+        contests = self.get_guild_contests(
+            self.finished_contests, ctx.guild.id)
+        await self._send_contest_list(ctx, contests,
                                       title='Recently finished contests',
                                       empty_msg='No finished contests found'
                                       )

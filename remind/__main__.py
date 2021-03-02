@@ -36,11 +36,21 @@ def setup():
 
 def main():
     load_dotenv()
-    token = os.getenv('BOT_TOKEN_REMIND')
 
+    token = os.getenv('BOT_TOKEN_REMIND')
     if not token:
         logging.error('Token required')
         return
+
+    super_users_str = os.getenv('SUPER_USERS')
+    if not super_users_str:
+        logging.error('Superusers required')
+        return
+    constants.SUPER_USERS = list(map(int, super_users_str.split(",")))
+
+    remind_moderator_role = os.getenv('REMIND_MODERATOR_ROLE')
+    if remind_moderator_role:
+        constants.REMIND_MODERATOR_ROLE = remind_moderator_role
 
     setup()
     keep_alive()
@@ -64,8 +74,8 @@ def main():
     # Restrict bot usage to inside guild channels only.
     bot.add_check(no_dm_check)
 
-    @bot.event
-    async def on_ready():
+    @discord_common.on_ready_event_once(bot)
+    async def init():
         clist_api.cache()
         asyncio.create_task(discord_common.presence(bot))
 
