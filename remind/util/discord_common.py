@@ -28,11 +28,14 @@ def embed_alert(desc):
 def attach_image(embed, img_file):
     embed.set_image(url=f'attachment://{img_file.filename}')
 
+
 def color_embed(**kwargs):
     return discord.Embed(**kwargs, color=random.choice(_COLORS))
 
+
 def set_author_footer(embed, user):
     embed.set_footer(text=f'Requested by {user}', icon_url=user.avatar_url)
+
 
 def time_format(seconds):
     seconds = int(seconds)
