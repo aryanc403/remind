@@ -29,6 +29,8 @@ _CONTESTS_PER_PAGE = 5
 _CONTEST_PAGINATE_WAIT_TIME = 5 * 60
 _FINISHED_CONTESTS_LIMIT = 5
 _CONTEST_REFRESH_PERIOD = 10 * 60  # seconds
+_GUILD_SETTINGS_BACKUP_PERIOD = 6 * 60 * 60  # seconds
+
 _PYTZ_TIMEZONES_GIST_URL = ('https://gist.github.com/heyalexej/'
                             '8bf688fd67d7199be4a1682b3eec7568')
 
@@ -151,7 +153,6 @@ def get_default_guild_settings():
 class Reminders(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-        self.running = False
         self.future_contests = None
         self.contest_cache = None
         self.active_contests = None
@@ -160,6 +161,7 @@ class Reminders(commands.Cog):
         self.task_map = defaultdict(list)
         # Maps guild_id to `GuildSettings`
         self.guild_map = defaultdict(get_default_guild_settings)
+        self.last_guild_backup_time = -1
 
         self.member_converter = commands.MemberConverter()
         self.role_converter = commands.RoleConverter()
@@ -167,11 +169,8 @@ class Reminders(commands.Cog):
         self.logger = logging.getLogger(self.__class__.__name__)
 
     @commands.Cog.listener()
+    @discord_common.once
     async def on_ready(self):
-        if self.running:
-            return
-        # To avoid re-initializing if discord is reconnected.
-        self.running = True
         guild_map_path = Path(constants.GUILD_SETTINGS_MAP_PATH)
         try:
             with guild_map_path.open('rb') as guild_map_file:
@@ -188,6 +187,7 @@ class Reminders(commands.Cog):
 
     async def cog_after_invoke(self, ctx):
         self._serialize_guild_map()
+        self._backup_serialize_guild_map()
         self._reschedule_tasks(ctx.guild.id)
 
     async def _update_task(self):
@@ -317,6 +317,19 @@ class Reminders(commands.Cog):
 
     def _serialize_guild_map(self):
         out_path = Path(constants.GUILD_SETTINGS_MAP_PATH)
+        with out_path.open(mode='wb') as out_file:
+            pickle.dump(self.guild_map, out_file)
+
+    def _backup_serialize_guild_map(self):
+        current_time_stamp = int(dt.datetime.utcnow().timestamp())
+        if current_time_stamp - self.last_guild_backup_time \
+                < _GUILD_SETTINGS_BACKUP_PERIOD:
+            return
+        self.last_guild_backup_time = current_time_stamp
+        out_path = Path(
+            constants.GUILD_SETTINGS_MAP_PATH +
+            "_" +
+            str(current_time_stamp))
         with out_path.open(mode='wb') as out_file:
             pickle.dump(self.guild_map, out_file)
 

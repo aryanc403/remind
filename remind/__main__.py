@@ -72,8 +72,8 @@ def main():
     # Restrict bot usage to inside guild channels only.
     bot.add_check(no_dm_check)
 
-    @bot.event
-    async def on_ready():
+    @discord_common.on_ready_event_once(bot)
+    async def init():
         clist_api.cache()
         asyncio.create_task(discord_common.presence(bot))
 
