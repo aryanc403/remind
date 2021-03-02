@@ -18,7 +18,6 @@ import discord
 from discord.ext import commands
 import os
 
-from remind.util import codeforces_common as cf_common
 from remind.util.rounds import Round
 from remind.util import discord_common
 from remind.util import paginator
@@ -45,7 +44,7 @@ def _contest_start_time_format(contest, tz):
 
 
 def _contest_duration_format(contest):
-    duration_days, duration_hrs, duration_mins, _ = cf_common.time_format(
+    duration_days, duration_hrs, duration_mins, _ = discord_common.time_format(
         contest.duration.total_seconds())
     duration = f'{duration_hrs}h {duration_mins}m'
     if duration_days > 0:
@@ -88,7 +87,7 @@ async def _send_reminder_at(channel, role, contests, before_secs, send_time,
     if delay <= 0:
         return
     await asyncio.sleep(delay)
-    values = cf_common.time_format(before_secs)
+    values = discord_common.time_format(before_secs)
 
     def make(value, label):
         tmp = f'{value} {label}'
@@ -98,7 +97,7 @@ async def _send_reminder_at(channel, role, contests, before_secs, send_time,
     before_str = ' '.join(make(value, label)
                           for label, value in zip(labels, values) if value > 0)
     desc = f'About to start in {before_str}'
-    embed = discord_common.cf_color_embed(description=desc)
+    embed = discord_common.color_embed(description=desc)
     for name, value in _get_embed_fields_from_contests(
             contests, localtimezone):
         embed.add_field(name=name, value=value)
@@ -292,7 +291,7 @@ class Reminders(commands.Cog):
         pages = []
         chunks = paginator.chunkify(contests, _CONTESTS_PER_PAGE)
         for chunk in chunks:
-            embed = discord_common.cf_color_embed()
+            embed = discord_common.color_embed()
             for name, value in _get_embed_fields_from_contests(
                     chunk, localtimezone):
                 embed.add_field(name=name, value=value, inline=False)
