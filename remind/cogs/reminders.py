@@ -135,7 +135,6 @@ GuildSettings = recordtype(
 class Reminders(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-        self.running = False
         self.future_contests = None
         self.contest_cache = None
         self.active_contests = None
@@ -152,11 +151,8 @@ class Reminders(commands.Cog):
         self.logger = logging.getLogger(self.__class__.__name__)
 
     @commands.Cog.listener()
+    @discord_common.once
     async def on_ready(self):
-        if self.running:
-            return
-        # To avoid re-initializing if discord is reconnected.
-        self.running = True
         guild_map_path = Path(constants.GUILD_SETTINGS_MAP_PATH)
         try:
             with guild_map_path.open('rb') as guild_map_file:
