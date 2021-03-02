@@ -5,7 +5,7 @@ import time
 import textwrap
 
 from discord.ext import commands
-from remind.util.codeforces_common import pretty_time_format
+from remind.util.discord_common import pretty_time_format
 from remind.util import clist_api
 from remind import constants
 
