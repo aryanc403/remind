@@ -28,6 +28,8 @@ _CONTESTS_PER_PAGE = 5
 _CONTEST_PAGINATE_WAIT_TIME = 5 * 60
 _FINISHED_CONTESTS_LIMIT = 5
 _CONTEST_REFRESH_PERIOD = 3 * 60 * 60  # seconds
+_GUILD_SETTINGS_BACKUP_PERIOD = 6 * 60 * 60  # seconds
+
 _PYTZ_TIMEZONES_GIST_URL = ('https://gist.github.com/heyalexej/'
                             '8bf688fd67d7199be4a1682b3eec7568')
 
@@ -141,6 +143,7 @@ class Reminders(commands.Cog):
         self.task_map = defaultdict(list)
         # Maps guild_id to `GuildSettings`
         self.guild_map = defaultdict(GuildSettings)
+        self.last_guild_backup_time = -1
 
         self.member_converter = commands.MemberConverter()
         self.role_converter = commands.RoleConverter()
@@ -166,6 +169,7 @@ class Reminders(commands.Cog):
 
     async def cog_after_invoke(self, ctx):
         self._serialize_guild_map()
+        self._backup_serialize_guild_map()
         self._reschedule_tasks(ctx.guild.id)
 
     async def _update_task(self):
@@ -290,6 +294,19 @@ class Reminders(commands.Cog):
 
     def _serialize_guild_map(self):
         out_path = Path(constants.GUILD_SETTINGS_MAP_PATH)
+        with out_path.open(mode='wb') as out_file:
+            pickle.dump(self.guild_map, out_file)
+
+    def _backup_serialize_guild_map(self):
+        current_time_stamp = int(dt.datetime.utcnow().timestamp())
+        if current_time_stamp - self.last_guild_backup_time \
+                < _GUILD_SETTINGS_BACKUP_PERIOD:
+            return
+        self.last_guild_backup_time = current_time_stamp
+        out_path = Path(
+            constants.GUILD_SETTINGS_MAP_PATH +
+            "_" +
+            str(current_time_stamp))
         with out_path.open(mode='wb') as out_file:
             pickle.dump(self.guild_map, out_file)
 

@@ -1,4 +1,6 @@
-# Remind
+# Remind [![GitHub stars](https://img.shields.io/github/stars/aryanc403/remind.svg?style=social&label=Star&maxAge=2592000)](https://github.com/aryanc403/remind/stargazers/)
+
+[![made-with-python](https://img.shields.io/badge/Made%20with-Python-1f425f.svg)](https://www.python.org/)
 
 A discord bot that sends reminders for future contests using [clist](https://clist.by/) API.
 
@@ -55,5 +57,5 @@ Shoutout to [TLE](https://github.com/cheran-senthil/TLE) developers for the idea
 Their bot used to remind about Codeforces contests and we enhanced it for all other judges.
 
 ## License
+[![MIT License](https://img.shields.io/apm/l/atomic-design-ui.svg?)](https://github.com/aryanc403/remind/blob/master/LICENSE)
 
-[MIT License](https://github.com/aryanc403/remind/blob/master/LICENSE)
