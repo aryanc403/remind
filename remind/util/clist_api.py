@@ -29,7 +29,7 @@ class ClientError(ClistApiError):
 
 
 def _query_api():
-    clist_token = os.getenv('CLIST_API_TOKEN')
+    clist_token = os.environ['CLIST_API_TOKEN']
     contests_start_time = dt.datetime.utcnow() - dt.timedelta(days=2)
     contests_start_time_string = contests_start_time.strftime(
         "%Y-%m-%dT%H%%3A%M%%3A%S")

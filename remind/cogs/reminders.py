@@ -171,6 +171,7 @@ class Reminders(commands.Cog):
     @discord_common.once
     async def on_ready(self):
         guild_map_path = Path(constants.GUILD_SETTINGS_MAP_PATH)
+        print("Bot is Online")
         try:
             with guild_map_path.open('rb') as guild_map_file:
                 guild_map = pickle.load(guild_map_file)
