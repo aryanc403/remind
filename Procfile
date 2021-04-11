@@ -1,1 +1,1 @@
-worker : python -m remind
+worker: python -m remind
