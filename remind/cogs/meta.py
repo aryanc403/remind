@@ -87,6 +87,10 @@ class Meta(commands.Cog):
         f'Gateway API latency: {int(self.bot.latency * 1000)}ms'
         await message.edit(content=content)
 
+    @meta.command()
+    async def herokuping(self, ctx):
+        await ctx.send(f'Pong! `My latency is {int(self.bot.latency * 1000)}ms`')
+
     @meta.command(brief='Get git information')
     async def git(self, ctx):
         """Replies with git information."""
