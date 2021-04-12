@@ -112,6 +112,7 @@ _WEBSITE_ALLOWED_PATTERNS['atcoder.jp'] = [
 _WEBSITE_ALLOWED_PATTERNS['topcoder.com'] = ['srm', 'tco']
 _WEBSITE_ALLOWED_PATTERNS['codingcompetitions.withgoogle.com'] = ['']
 _WEBSITE_ALLOWED_PATTERNS['facebook.com/hackercup'] = ['']
+_WEBSITE_ALLOWED_PATTERNS['codedrills.io'] = ['']
 
 _WEBSITE_DISALLOWED_PATTERNS = defaultdict(list)
 _WEBSITE_DISALLOWED_PATTERNS['codeforces.com'] = [
@@ -122,6 +123,7 @@ _WEBSITE_DISALLOWED_PATTERNS['topcoder.com'] = []
 _WEBSITE_DISALLOWED_PATTERNS['codingcompetitions.withgoogle.com'] = [
     'registration']
 _WEBSITE_DISALLOWED_PATTERNS['facebook.com/hackercup'] = []
+_WEBSITE_DISALLOWED_PATTERNS['codedrills.io'] = []
 
 _SUPPORTED_WEBSITES = [
     'codeforces.com',
@@ -129,7 +131,8 @@ _SUPPORTED_WEBSITES = [
     'atcoder.jp',
     'topcoder.com',
     'codingcompetitions.withgoogle.com',
-    'facebook.com/hackercup'
+    'facebook.com/hackercup',
+    'codedrills.io'
 ]
 
 GuildSettings = recordtype(
