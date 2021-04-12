@@ -56,6 +56,7 @@ Use `autopep8 --in-place --aggressive --aggressive <file name>` for formatting b
 Shoutout to [TLE](https://github.com/cheran-senthil/TLE) developers for the idea and initial contributions to this bot.
 Their bot used to remind about Codeforces contests and we enhanced it for all other judges.
 
+Further Developed by Mitul Vashista.
+
 ## License
 [![MIT License](https://img.shields.io/apm/l/atomic-design-ui.svg?)](https://github.com/aryanc403/remind/blob/master/LICENSE)
-
