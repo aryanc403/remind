@@ -36,7 +36,8 @@ def setup():
 def main():
     load_dotenv()
 
-    token = os.environ['DISCORD_TOKEN']
+    # token = os.environ['DISCORD_TOKEN']
+    token =os.getenv('BOT_TOKEN_REMIND')
     if not token:
         logging.error('Token required')
         return
@@ -53,8 +54,8 @@ def main():
 
     setup()
 
-    intents = discord.Intents.default()
-    intents.members = True
+    intents = discord.Intents.all()
+    # intents.members = True
     bot = commands.Bot(
         command_prefix=commands.when_mentioned_or('t;'),
         intents=intents)
