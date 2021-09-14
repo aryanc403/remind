@@ -4,6 +4,10 @@
 
 A discord bot that sends reminders for future contests using [clist](https://clist.by/) API.
 
+## The future of remind bot
+Major dependency of this project [discord.py](https://github.com/Rapptz/discord.py) is now deprecated and would no longer be maintained. There are some forks of [TLE](https://github.com/cheran-senthil/TLE) bot which uses this repo as cog and probably they will update it. New changes introduced by discord would eventually break almost all features. 
+Rather than reinventing the same wheel again I would prefer to work on something else and learn something new.
+
 ## Installation
 
 > **Use Python 3.7 or later.**
